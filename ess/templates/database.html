@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+{% block body %}
+	<form action="{{ url_for('list') }}" method=post class=entries>
+		<dl>
+			<dt>Search:
+			<dd><input type=text size=30, value="{{ searchword }}" name=search>
+			<dd><input type=submit value=search>
+		</dl>
+	</form>
+	{% if entries %}
+		<table border='1'>
+			<tr>
+				<th> <h2>Title</h2> </th>
+				<th> <h2>Artist</h2> </th>
+				<th> <h2>Album</h2> </th>
+				<th> <h2>Date</h2> </th>
+				<th> <h2>Genre</h2> </th>
+				<th> <h2>Track</h2> </th>
+				<th> <h2>Times played</h2> </th>
+			</tr>
+			{% for entry in entries %}
+				<tr>
+					<th> {{ entry.title }} </th>
+					<th> {{ entry.artist.name }} </th>
+					<th> {{ entry.album.name }} </th>
+					<th> {{ entry.date }} </th>
+					<th> {{ entry.genre }} </th>
+					<th> {{ entry.tracknumber }} </th>
+					<th> {{ entry.times_played }} </th>
+				</tr>
+			{% endfor %}
+		</table>
+	{% else %}
+	<em>No Results</em>
+	{% endif %}	
+{% endblock %}
