@@ -1,0 +1,1069 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ess.server &mdash; ess-player 0.s20140625 documentation</title>
+    
+    <link rel="stylesheet" href="_static/lernfunk.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.s20140625',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="ess-player 0.s20140625 documentation" href="index.html" />
+    <link rel="up" title="API Documentation" href="api.html" />
+    <link rel="next" title="REST Documentation" href="rest.html" />
+    <link rel="prev" title="ess.db" href="api.db.html" /> 
+  </head>
+  <body>
+      <div class="header"><img class="rightlogo" src="_static/logo.png" alt="Logo"/><h1 class="heading"><a href="index.html">
+          <span>ess-player 0.s20140625 documentation</span></a></h1>
+        <h2 class="heading"><span>ess.server</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="api.db.html">ess.db</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="rest.html">REST Documentation</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <span class="target" id="module-ess.server"></span><div class="section" id="ess-server">
+<h1>ess.server<a class="headerlink" href="#ess-server" title="Permalink to this headline">¶</a></h1>
+<p>This is the ess-server.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">license:</th><td class="field-body">FreeBSD, see license file for more details.</td>
+</tr>
+</tbody>
+</table>
+<dl class="function">
+<dt id="ess.server.command_get">
+<tt class="descclassname">ess.server.</tt><tt class="descname">command_get</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.command_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get command for the player <em>name</em>. The Output is JSON
+encoded.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>200</td>
+<td>OK</td>
+<td>Returned command</td>
+</tr>
+<tr class="row-odd"><td>200</td>
+<td>No Content</td>
+<td>No Command set</td>
+</tr>
+<tr class="row-even"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to get current of “player01“:</p>
+<div class="highlight-python"><pre>curl -i http://127.0.0.1:5001/command/player01</pre>
+</div>
+<p>Example of a result:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&quot;command&quot;</span><span class="p">:</span> <span class="s">&quot;next&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.command_set">
+<tt class="descclassname">ess.server.</tt><tt class="descname">command_set</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.command_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set command for the player <em>name</em>. The data have to be JSON encoded.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>201</td>
+<td>Created</td>
+<td>Set command</td>
+</tr>
+<tr class="row-odd"><td>400</td>
+<td>Bad Request</td>
+<td>Review your request</td>
+</tr>
+<tr class="row-even"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example data to set command “pause“:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&quot;command&quot;</span><span class="p">:</span><span class="s">&quot;pause&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>cURL command to set command “pause“ for “player01”:</p>
+<div class="highlight-python"><pre>curl -i --request PUT -H 'Content-Type: application/json' \
+        --data '{"command":"pause"}' "http://127.0.0.1:5001/command/player01"</pre>
+</div>
+<p>Sending the data:</p>
+<blockquote>
+<div>The data have to be JSON encoded and should fill the whole request body.
+The content type of the request should be “application/json”. If
+necessary, the content type can also be “multipart/form-data” or
+“application/x-www-form-urlencoded” with the JSON data in the field
+called “data”. However, we very much like to discourage you from using
+the later method. While it should work in theory we are only using and
+testing the first method.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.current_done">
+<tt class="descclassname">ess.server.</tt><tt class="descname">current_done</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.current_done" title="Permalink to this definition">¶</a></dt>
+<dd><p>Let the server know, that the current song was played successful.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="6%" />
+<col width="31%" />
+<col width="63%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>204</td>
+<td>No Content</td>
+<td>Server knows current was played successful</td>
+</tr>
+<tr class="row-odd"><td>400</td>
+<td>Bad Request</td>
+<td>Review your request</td>
+</tr>
+<tr class="row-even"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to inform server about current played song of “player01“:</p>
+<div class="highlight-python"><pre>curl http://127.0.0.1:5001/playlist/player01/current/done</pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.current_playing_delete">
+<tt class="descclassname">ess.server.</tt><tt class="descname">current_playing_delete</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.current_playing_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unset current played sing from the player <em>name</em>.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>200</td>
+<td>OK</td>
+<td>Deleted current</td>
+</tr>
+<tr class="row-odd"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-even"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to unset current of “player01“:</p>
+<div class="highlight-python"><pre>curl --request DELETE http://127.0.0.1:5001/playlist/player01/current</pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.current_playing_get">
+<tt class="descclassname">ess.server.</tt><tt class="descname">current_playing_get</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.current_playing_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get current played song from the player <em>name</em>. The Output is JSON
+encoded.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>200</td>
+<td>OK</td>
+<td>Returned current</td>
+</tr>
+<tr class="row-odd"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-even"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to get current of “player01“:</p>
+<div class="highlight-python"><pre>curl -i http://127.0.0.1:5001/playlist/player01/current</pre>
+</div>
+<p>Example of a result:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&quot;current&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+        <span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="s">&quot;player01&quot;</span>
+    <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.current_playing_set">
+<tt class="descclassname">ess.server.</tt><tt class="descname">current_playing_set</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.current_playing_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set current played song from the player <em>name</em>. The data have to be JSON encoded.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>201</td>
+<td>Created</td>
+<td>Set current</td>
+</tr>
+<tr class="row-odd"><td>400</td>
+<td>Bad Request</td>
+<td>Review your request</td>
+</tr>
+<tr class="row-even"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example data to set current to the entry “3“:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&quot;current&quot;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>cURL command to set current to the entry “3“ from “player01”&#8217;s playlist:</p>
+<div class="highlight-python"><pre>curl -i --request PUT -H 'Content-Type: application/json' \
+        --data '{"current":3}' "http://127.0.0.1:5001/playlist/player01/current"</pre>
+</div>
+<p>Sending the data:</p>
+<blockquote>
+<div>The data have to be JSON encoded and should fill the whole request body.
+The content type of the request should be “application/json”. If
+necessary, the content type can also be “multipart/form-data” or
+“application/x-www-form-urlencoded” with the JSON data in the field
+called “data”. However, we very much like to discourage you from using
+the later method. While it should work in theory we are only using and
+testing the first method.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.deliver_media">
+<tt class="descclassname">ess.server.</tt><tt class="descname">deliver_media</tt><big>(</big><em>media_id</em><big>)</big><a class="headerlink" href="#ess.server.deliver_media" title="Permalink to this definition">¶</a></dt>
+<dd><p>Deliver media to player</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.media_search">
+<tt class="descclassname">ess.server.</tt><tt class="descname">media_search</tt><big>(</big><big>)</big><a class="headerlink" href="#ess.server.media_search" title="Permalink to this definition">¶</a></dt>
+<dd><p>Full text search for media files.</p>
+<p>This method exposes an easy to use method for searching through the media
+library. It should be convenient to use for UIs wanting to have a general
+search interface.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="45%" />
+<col width="47%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>200</td>
+<td>OK</td>
+<td>Returned search result</td>
+</tr>
+<tr class="row-odd"><td>400</td>
+<td>Bad Request</td>
+<td>Review your request</td>
+</tr>
+<tr class="row-even"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to search for term “pathetic”:</p>
+<div class="highlight-python"><pre>curl -f --request POST 'http://localhost:5001/search' \
+        -H 'Content-Type: application/json' --data '{"search":"pathetic"}'</pre>
+</div>
+<p>Search result:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="p">[</span>
+     <span class="p">{</span>
+        <span class="s">&quot;album&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s">&quot;artist&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+          <span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+          <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;Lightning&quot;</span>
+        <span class="p">},</span>
+        <span class="s">&quot;artist&quot;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+          <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="s">&quot;Tamara Laurel&quot;</span>
+        <span class="p">},</span>
+        <span class="s">&quot;date&quot;</span><span class="p">:</span> <span class="s">&quot;2014&quot;</span><span class="p">,</span>
+        <span class="s">&quot;duration&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+        <span class="s">&quot;genre&quot;</span><span class="p">:</span> <span class="s">&quot;(255)&quot;</span><span class="p">,</span>
+        <span class="s">&quot;path&quot;</span><span class="p">:</span> <span class="s">&quot;/home/lars/music/sorted/Tamara Laurel - Lightning/05 - Tamara Laurel - Pathetic.mp3&quot;</span><span class="p">,</span>
+        <span class="s">&quot;times_played&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+        <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;Pathetic&quot;</span><span class="p">,</span>
+        <span class="s">&quot;tracknumber&quot;</span><span class="p">:</span> <span class="mi">5</span>
+     <span class="p">}</span>
+  <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Sending the data:</p>
+<blockquote>
+<div>The data have to be JSON encoded and should fill the whole request body.
+The content type of the request should be “application/json”. If
+necessary, the content type can also be “multipart/form-data” or
+“application/x-www-form-urlencoded” with the JSON data in the field
+called “data”. However, we very much like to discourage you from using
+the later method. While it should work in theory we are only using and
+testing the first method.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.player_delete">
+<tt class="descclassname">ess.server.</tt><tt class="descname">player_delete</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.player_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete player <em>name</em>.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>204</td>
+<td>No Content</td>
+<td>Player deleted</td>
+</tr>
+<tr class="row-odd"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-even"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to delete “player01“:</p>
+<div class="highlight-python"><pre>curl --request DELETE http://127.0.0.1:5001/player/player01</pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.player_list">
+<tt class="descclassname">ess.server.</tt><tt class="descname">player_list</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.player_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List player <em>name</em>. The Output is JSON encoded.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>200</td>
+<td>OK</td>
+<td>Return playered</td>
+</tr>
+<tr class="row-odd"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-even"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to list player01:</p>
+<div class="highlight-python"><pre>curl -i http://127.0.0.1:5001/player/player01</pre>
+</div>
+<p>Example of a result:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&quot;current&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+    <span class="s">&quot;description&quot;</span><span class="p">:</span> <span class="s">&quot;The first player&quot;</span><span class="p">,</span>
+    <span class="s">&quot;playername&quot;</span><span class="p">:</span> <span class="s">&quot;player01&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.player_list_all">
+<tt class="descclassname">ess.server.</tt><tt class="descname">player_list_all</tt><big>(</big><big>)</big><a class="headerlink" href="#ess.server.player_list_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>List all registered players. The output is JSON encoded.</p>
+<p>This method exposes an easy to use method for listing all registered
+players. It should be convenient to use for UIs wanting to know all
+registered players.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="7%" />
+<col width="35%" />
+<col width="58%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>200</td>
+<td>OK</td>
+<td>Returned list of registered players</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to list all players:</p>
+<div class="highlight-python"><pre>curl -i http://127.0.0.1:5001/player</pre>
+</div>
+<p>Example for a result:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s">&quot;current&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s">&quot;description&quot;</span><span class="p">:</span> <span class="s">&quot;The first player&quot;</span><span class="p">,</span>
+            <span class="s">&quot;playername&quot;</span><span class="p">:</span> <span class="s">&quot;player01&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&quot;current&quot;</span><span class="p">:</span> <span class="n">null</span><span class="p">,</span>
+            <span class="s">&quot;description&quot;</span><span class="p">:</span> <span class="s">&quot;The second player&quot;</span><span class="p">,</span>
+            <span class="s">&quot;playername&quot;</span><span class="p">:</span> <span class="s">&quot;player02&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.player_register">
+<tt class="descclassname">ess.server.</tt><tt class="descname">player_register</tt><big>(</big><big>)</big><a class="headerlink" href="#ess.server.player_register" title="Permalink to this definition">¶</a></dt>
+<dd><p>Register a player. The data have to be JSON encoded.</p>
+<p>This method exposes an easy to use method for register a new player. It
+should be called when a new player is initialize.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="7%" />
+<col width="39%" />
+<col width="54%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>201</td>
+<td>Created</td>
+<td>Registered Player</td>
+</tr>
+<tr class="row-odd"><td>204</td>
+<td>No Content</td>
+<td>Player was already registered</td>
+</tr>
+<tr class="row-even"><td>400</td>
+<td>Bad Request</td>
+<td>Review your request</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example data to register a player “player01”:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&quot;name&quot;</span><span class="p">:</span><span class="s">&quot;player01&quot;</span><span class="p">,</span> <span class="s">&quot;description&quot;</span><span class="p">:</span><span class="s">&quot;The first player&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>cURL command to register a player player01:</p>
+<div class="highlight-python"><pre>curl -i --request POST -H 'Content-Type: application/json' \
+        --data '{"name":"player01"}'  "http://127.0.0.1:5001/player"</pre>
+</div>
+<p>Sending the data:</p>
+<blockquote>
+<div>The data have to be JSON encoded and should fill the whole request body.
+The content type of the request should be “application/json”. If
+necessary, the content type can also be “multipart/form-data” or
+“application/x-www-form-urlencoded” with the JSON data in the field
+called “data”. However, we very much like to discourage you from using
+the later method. While it should work in theory we are only using and
+testing the first method.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.playlist_delete">
+<tt class="descclassname">ess.server.</tt><tt class="descname">playlist_delete</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.playlist_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete playlist of player <em>name</em>.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>204</td>
+<td>No Content</td>
+<td>Playlist deleted</td>
+</tr>
+<tr class="row-odd"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-even"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to delete playlist of “player01“:</p>
+<div class="highlight-python"><pre>curl --request DELETE http://127.0.0.1:5001/playlist/player01</pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.playlist_delete_all">
+<tt class="descclassname">ess.server.</tt><tt class="descname">playlist_delete_all</tt><big>(</big><big>)</big><a class="headerlink" href="#ess.server.playlist_delete_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete all playlists.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="49%" />
+<col width="42%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>204</td>
+<td>No Content</td>
+<td>Playlists deleted</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to delete all playlists:</p>
+<div class="highlight-python"><pre>curl --request DELETE http://127.0.0.1:5001/playlist</pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.playlist_entry_add">
+<tt class="descclassname">ess.server.</tt><tt class="descname">playlist_entry_add</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.playlist_entry_add" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add an entry to the playlist of the player <em>name</em>. The data have to be
+JSON encoded.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>201</td>
+<td>Created</td>
+<td>Created playlist</td>
+</tr>
+<tr class="row-odd"><td>400</td>
+<td>Bad Request</td>
+<td>Review your request</td>
+</tr>
+<tr class="row-even"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example data to post an entry:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&quot;media&quot;</span><span class="p">:</span><span class="mi">3</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>cURL command to post an entry to the playlist of “player01“:</p>
+<div class="highlight-python"><pre>curl -i --request POST -H 'Content-Type: application/json' \
+        --data '{"media":3}' "http://127.0.0.1:5001/playlist/player01"</pre>
+</div>
+<p>Sending the data:</p>
+<blockquote>
+<div>The data have to be JSON encoded and should fill the whole request body.
+The content type of the request should be “application/json”. If
+necessary, the content type can also be “multipart/form-data” or
+“application/x-www-form-urlencoded” with the JSON data in the field
+called “data”. However, we very much like to discourage you from using
+the later method. While it should work in theory we are only using and
+testing the first method.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.playlist_entry_delete">
+<tt class="descclassname">ess.server.</tt><tt class="descname">playlist_entry_delete</tt><big>(</big><em>name</em>, <em>place</em><big>)</big><a class="headerlink" href="#ess.server.playlist_entry_delete" title="Permalink to this definition">¶</a></dt>
+<dd><p>Delete entry on order <em>place</em> of player <em>name</em>&#8216;s playlist.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>204</td>
+<td>No Content</td>
+<td>Deleted entry</td>
+</tr>
+<tr class="row-odd"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-even"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to delete entry “3“ of “player01“:</p>
+<div class="highlight-python"><pre>curl --request DELETE http://127.0.0.1:5001/playlist/player01/3</pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.playlist_entry_move">
+<tt class="descclassname">ess.server.</tt><tt class="descname">playlist_entry_move</tt><big>(</big><em>name</em>, <em>place</em><big>)</big><a class="headerlink" href="#ess.server.playlist_entry_move" title="Permalink to this definition">¶</a></dt>
+<dd><p>Move entry on order <em>place</em> up or down in the playlist of player <em>name</em></p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="7%" />
+<col width="38%" />
+<col width="55%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>204</td>
+<td>No Content</td>
+<td>Changed order</td>
+</tr>
+<tr class="row-odd"><td>404</td>
+<td>Not Found</td>
+<td>Player or entries do not exist</td>
+</tr>
+<tr class="row-even"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to move entry “1“ of the playlist of “player01“ up and down:</p>
+<div class="highlight-python"><pre>curl http://127.0.0.1:5001/playlist/player01/1/up
+
+curl http://127.0.0.1:5001/playlist/player01/1/down</pre>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.playlist_list">
+<tt class="descclassname">ess.server.</tt><tt class="descname">playlist_list</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.playlist_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the playlist of player <em>name</em>. The output is JSON encoded.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>200</td>
+<td>OK</td>
+<td>Returned playlist</td>
+</tr>
+<tr class="row-odd"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-even"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to list playlist of “player01“:</p>
+<div class="highlight-python"><pre>curl -i http://127.0.0.1:5001/playlist/player01</pre>
+</div>
+<p>Example of a result:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&quot;player01&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="s">&quot;player01&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="s">&quot;player01&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+            <span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="s">&quot;player01&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.playlist_list_all">
+<tt class="descclassname">ess.server.</tt><tt class="descname">playlist_list_all</tt><big>(</big><big>)</big><a class="headerlink" href="#ess.server.playlist_list_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>List the playlist of all registered players. The output is JSON encoded.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="49%" />
+<col width="42%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>200</td>
+<td>OK</td>
+<td>Returned playlists</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>cURL command to list all playlists:</p>
+<div class="highlight-python"><pre>curl -i http://127.0.0.1:5001/playlist</pre>
+</div>
+<p>Example of a result:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+    <span class="s">&quot;player01&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="s">&quot;player01&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="s">&quot;player01&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+            <span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="s">&quot;player01&quot;</span>
+        <span class="p">}</span>
+    <span class="p">],</span>
+    <span class="s">&quot;player02&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="s">&quot;player02&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s">&quot;order&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s">&quot;player&quot;</span><span class="p">:</span> <span class="s">&quot;player02&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.playlist_put">
+<tt class="descclassname">ess.server.</tt><tt class="descname">playlist_put</tt><big>(</big><em>name</em><big>)</big><a class="headerlink" href="#ess.server.playlist_put" title="Permalink to this definition">¶</a></dt>
+<dd><p>Put a playlist for the player <em>name</em>. The data have to be
+JSON encoded.</p>
+<p>HTTP return codes:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="9%" />
+<col width="46%" />
+<col width="46%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Code</th>
+<th class="head">Status</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>201</td>
+<td>Created</td>
+<td>Created playlist</td>
+</tr>
+<tr class="row-odd"><td>400</td>
+<td>Bad Request</td>
+<td>Review your request</td>
+</tr>
+<tr class="row-even"><td>404</td>
+<td>Not Found</td>
+<td>Player does not exist</td>
+</tr>
+<tr class="row-odd"><td>500</td>
+<td>Internal Server Error</td>
+<td>Please report this</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
+<p>Example data to put a playlist:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="p">{</span><span class="s">&quot;media&quot;</span><span class="p">:[</span><span class="mi">3</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">1</span><span class="p">]}</span>
+</pre></div>
+</div>
+<p>cURL command to put a playlist for “player01“:</p>
+<div class="highlight-python"><pre>curl -i --request PUT -H 'Content-Type: application/json' \
+        --data '{"media":[3,5,7,1]}' "http://127.0.0.1:5001/playlist/player01"</pre>
+</div>
+<p>Sending the data:</p>
+<blockquote>
+<div>The data have to be JSON encoded and should fill the whole request body.
+The content type of the request should be “application/json”. If
+necessary, the content type can also be “multipart/form-data” or
+“application/x-www-form-urlencoded” with the JSON data in the field
+called “data”. However, we very much like to discourage you from using
+the later method. While it should work in theory we are only using and
+testing the first method.</div></blockquote>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.server.render">
+<tt class="descclassname">ess.server.</tt><tt class="descname">render</tt><big>(</big><big>)</big><a class="headerlink" href="#ess.server.render" title="Permalink to this definition">¶</a></dt>
+<dd><p>Render sites</p>
+</dd></dl>
+
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="api.db.html">ess.db</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="rest.html">REST Documentation</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2014, Sven Haardiek, Lars Kiesow.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>

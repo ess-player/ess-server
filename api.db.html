@@ -1,0 +1,335 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>ess.db &mdash; ess-player 0.s20140625 documentation</title>
+    
+    <link rel="stylesheet" href="_static/lernfunk.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="_static/print.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '0.s20140625',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/theme_extras.js"></script>
+    <link rel="top" title="ess-player 0.s20140625 documentation" href="index.html" />
+    <link rel="up" title="API Documentation" href="api.html" />
+    <link rel="next" title="ess.server" href="api.server.html" />
+    <link rel="prev" title="API Documentation" href="api.html" /> 
+  </head>
+  <body>
+      <div class="header"><img class="rightlogo" src="_static/logo.png" alt="Logo"/><h1 class="heading"><a href="index.html">
+          <span>ess-player 0.s20140625 documentation</span></a></h1>
+        <h2 class="heading"><span>ess.db</span></h2>
+      </div>
+      <div class="topnav">
+      
+        <p>
+        «&#160;&#160;<a href="api.html">API Documentation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="api.server.html">ess.server</a>&#160;&#160;»
+        </p>
+
+      </div>
+      <div class="content">
+        
+        
+  <div class="apititle"><b>Contents</b></div>
+<div class="apitoc"></div><span class="target" id="module-ess.db"></span><div class="section" id="ess-db">
+<h1>ess.db<a class="headerlink" href="#ess-db" title="Permalink to this headline">¶</a></h1>
+<p>Database specification for the ess player project.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">license:</th><td class="field-body">FreeBSD, see license file for more details.</td>
+</tr>
+</tbody>
+</table>
+<dl class="class">
+<dt id="ess.db.Album">
+<em class="property">class </em><tt class="descclassname">ess.db.</tt><tt class="descname">Album</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#ess.db.Album" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database definition of an album.</p>
+<dl class="attribute">
+<dt id="ess.db.Album.artist">
+<tt class="descname">artist</tt><a class="headerlink" href="#ess.db.Album.artist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Artist of an Album</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Album.artist_id">
+<tt class="descname">artist_id</tt><a class="headerlink" href="#ess.db.Album.artist_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Id of the Artist of an Album</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Album.id">
+<tt class="descname">id</tt><a class="headerlink" href="#ess.db.Album.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique identifier of an album</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Album.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ess.db.Album.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of an album</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ess.db.Album.serialize">
+<tt class="descname">serialize</tt><big>(</big><em>expand=0</em><big>)</big><a class="headerlink" href="#ess.db.Album.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize this object as dictionary usable for conversion to JSON.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>expand</strong> &#8211; Defines if sub objects shall be serialized as well.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary representing this object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ess.db.Artist">
+<em class="property">class </em><tt class="descclassname">ess.db.</tt><tt class="descname">Artist</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#ess.db.Artist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database definition of an artist.</p>
+<dl class="attribute">
+<dt id="ess.db.Artist.id">
+<tt class="descname">id</tt><a class="headerlink" href="#ess.db.Artist.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique identifier of an artist</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Artist.name">
+<tt class="descname">name</tt><a class="headerlink" href="#ess.db.Artist.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of an artist</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ess.db.Artist.serialize">
+<tt class="descname">serialize</tt><big>(</big><em>expand=0</em><big>)</big><a class="headerlink" href="#ess.db.Artist.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize this object as dictionary usable for conversion to JSON.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>expand</strong> &#8211; Defines if sub objects shall be serialized as well.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary representing this object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ess.db.Media">
+<em class="property">class </em><tt class="descclassname">ess.db.</tt><tt class="descname">Media</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#ess.db.Media" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database definition of a mediafile.</p>
+<dl class="attribute">
+<dt id="ess.db.Media.album">
+<tt class="descname">album</tt><a class="headerlink" href="#ess.db.Media.album" title="Permalink to this definition">¶</a></dt>
+<dd><p>Album of a mediafile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.album_id">
+<tt class="descname">album_id</tt><a class="headerlink" href="#ess.db.Media.album_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Id of the Album of a mediafile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.artist">
+<tt class="descname">artist</tt><a class="headerlink" href="#ess.db.Media.artist" title="Permalink to this definition">¶</a></dt>
+<dd><p>Artist of a mediafile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.artist_id">
+<tt class="descname">artist_id</tt><a class="headerlink" href="#ess.db.Media.artist_id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Id of the Artist of a mediafile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.date">
+<tt class="descname">date</tt><a class="headerlink" href="#ess.db.Media.date" title="Permalink to this definition">¶</a></dt>
+<dd><p>Date of a mediafile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.duration">
+<tt class="descname">duration</tt><a class="headerlink" href="#ess.db.Media.duration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duration of a mediafile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.genre">
+<tt class="descname">genre</tt><a class="headerlink" href="#ess.db.Media.genre" title="Permalink to this definition">¶</a></dt>
+<dd><p>Genre of a mediafile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.id">
+<tt class="descname">id</tt><a class="headerlink" href="#ess.db.Media.id" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unique identifier of a mediafile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.path">
+<tt class="descname">path</tt><a class="headerlink" href="#ess.db.Media.path" title="Permalink to this definition">¶</a></dt>
+<dd><p>Path of a mediafile</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ess.db.Media.serialize">
+<tt class="descname">serialize</tt><big>(</big><em>expand=0</em><big>)</big><a class="headerlink" href="#ess.db.Media.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize this object as dictionary usable for conversion to JSON.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>expand</strong> &#8211; Defines if sub objects shall be serialized as well.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary representing this object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.times_played">
+<tt class="descname">times_played</tt><a class="headerlink" href="#ess.db.Media.times_played" title="Permalink to this definition">¶</a></dt>
+<dd><p>Times the mediafile was played</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.title">
+<tt class="descname">title</tt><a class="headerlink" href="#ess.db.Media.title" title="Permalink to this definition">¶</a></dt>
+<dd><p>Title of a mediafile</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Media.tracknumber">
+<tt class="descname">tracknumber</tt><a class="headerlink" href="#ess.db.Media.tracknumber" title="Permalink to this definition">¶</a></dt>
+<dd><p>Tracknumber of a mediafile in an album</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="ess.db.Player">
+<em class="property">class </em><tt class="descclassname">ess.db.</tt><tt class="descname">Player</tt><big>(</big><em>**kwargs</em><big>)</big><a class="headerlink" href="#ess.db.Player" title="Permalink to this definition">¶</a></dt>
+<dd><p>Database definition of a player.</p>
+<dl class="attribute">
+<dt id="ess.db.Player.command">
+<tt class="descname">command</tt><a class="headerlink" href="#ess.db.Player.command" title="Permalink to this definition">¶</a></dt>
+<dd><p>Command for the player. The most time None</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Player.current">
+<tt class="descname">current</tt><a class="headerlink" href="#ess.db.Player.current" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mediafile that is currenty played</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Player.current_idx">
+<tt class="descname">current_idx</tt><a class="headerlink" href="#ess.db.Player.current_idx" title="Permalink to this definition">¶</a></dt>
+<dd><p>Id of the mediafile that is currently played</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Player.description">
+<tt class="descname">description</tt><a class="headerlink" href="#ess.db.Player.description" title="Permalink to this definition">¶</a></dt>
+<dd><p>Optional description of a player</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="ess.db.Player.playername">
+<tt class="descname">playername</tt><a class="headerlink" href="#ess.db.Player.playername" title="Permalink to this definition">¶</a></dt>
+<dd><p>Name of a player (This is unique)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="ess.db.Player.serialize">
+<tt class="descname">serialize</tt><big>(</big><em>expand=0</em><big>)</big><a class="headerlink" href="#ess.db.Player.serialize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize this object as dictionary usable for conversion to JSON.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>expand</strong> &#8211; Defines if sub objects shall be serialized as well.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">Dictionary representing this object.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.db.get_session">
+<tt class="descclassname">ess.db.</tt><tt class="descname">get_session</tt><big>(</big><big>)</big><a class="headerlink" href="#ess.db.get_session" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a session for database communication. If necessary a new connection
+to the database will be established.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">Database session</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ess.db.init">
+<tt class="descclassname">ess.db.</tt><tt class="descname">init</tt><big>(</big><big>)</big><a class="headerlink" href="#ess.db.init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize connection to database. Additionally the basic database
+structure will be created if nonexistent.</p>
+</dd></dl>
+
+</div>
+
+
+      </div>
+      <div class="bottomnav">
+      
+        <p>
+        «&#160;&#160;<a href="api.html">API Documentation</a>
+        &#160;&#160;::&#160;&#160;
+        <a class="uplink" href="index.html">Contents</a>
+        &#160;&#160;::&#160;&#160;
+        <a href="api.server.html">ess.server</a>&#160;&#160;»
+        </p>
+
+      </div>
+
+    <div class="footer">
+        &copy; Copyright 2014, Sven Haardiek, Lars Kiesow.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
