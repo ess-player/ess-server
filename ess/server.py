@@ -108,3 +108,11 @@ def handle_player():
 			session.commit()
 			return 'Created', 201
 		return 'Existed', 201
+
+	if request.method == 'GET':
+		playerlist = {}
+		for player in session.query(Player):
+			playerlist[player.playername] = {'description' : player.description,
+					'current' : player.current}
+
+		return  json.dumps(playerlist)
