@@ -15,7 +15,7 @@ from sqlalchemy import or_
 from sqlalchemy.orm import joinedload
 import sys
 import subprocess, json
-from ess.db import get_session, Song, Artist, Album
+from ess.db import get_session, Song, Artist, Album, Player, Playlist
 
 # Create aplication
 app = Flask(__name__)
@@ -71,3 +71,40 @@ def deliver_song(song_id):
 		return send_from_directory(path, filename)
 
 	abort(404)
+
+# Handle players
+@app.route('/player/', methods = ['GET', 'POST', 'DELETE'])
+def handle_player():
+
+	# Method POST
+	if request.method == 'POST':
+		_formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
+		if request.content_type in _formdata:
+			data = request.form['data']
+			type = request.form['type']
+		else:
+			data = request.data
+			type = request.content_type
+		if not type in ['application/json']:
+			return 'Invalid data type: %s' % type, 400
+		try:
+			data = json.loads(data)
+		except ValueError as e:
+			return e.message, 400
+
+		playername  = data.get('playername')
+		if not playername:
+			return 'playername is missing', 400
+
+		description = data.get('description')
+
+		player = session.query(Player).filter(Player.playername==playername).first()
+		if not player:
+	 		player = Player(
+					playername=playername,
+					description=description)
+			session.add(player)
+			print('>>> Create new player: %s' % playername)
+			session.commit()
+			return 'Created', 201
+		return 'Existed', 201
