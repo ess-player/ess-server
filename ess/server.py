@@ -116,3 +116,30 @@ def handle_player():
 					'current' : player.current}
 
 		return  json.dumps(playerlist)
+
+	if request.method == 'DELETE':
+		_formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
+		if request.content_type in _formdata:
+			data = request.form['data']
+			type = request.form['type']
+		else:
+			data = request.data
+			type = request.content_type
+		if not type in ['application/json']:
+			return 'Invalid data type: %s' % type, 400
+		try:
+			data = json.loads(data)
+		except ValueError as e:
+			return e.message, 400
+
+		playername  = data.get('playername')
+		if not playername:
+			return 'playername is missing', 400
+
+		player = session.query(Player).filter(Player.playername==playername).first()
+		if player:
+			session.delete(player)
+			session.commit()
+			return 'Deleted', 201
+
+		return 'Do not exists', 201
