@@ -88,7 +88,7 @@ def player_register():
 			else request.data
 	try:
 		data = json.loads(data)
-	except ValueError as e:
+	except Exception as e:
 		return e.message, 400
 
 	# Get the name of the player. It may not be empty.
