@@ -6,7 +6,7 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-# Imports
+from ess import config
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, create_engine
 from sqlalchemy.orm import sessionmaker, relationship, backref
@@ -15,8 +15,7 @@ Base = declarative_base()
 
 # Init
 def get_session():
-	DATABASE = 'mysql://ess:secret@localhost/ess?charset=utf8'
-	engine = create_engine(DATABASE)
+	engine = create_engine(config.DATABASE)
 	Base.metadata.create_all(engine)
 	Session = sessionmaker(bind=engine)
 	return Session()
@@ -70,6 +69,7 @@ class Song(Base):
 		return '<Song(id=%i, title="%s", artist_id=%i)>' % \
 			(self.id, self.title, self.artist_id)
 
+
 class Player(Base):
 	__tablename__ = 'player'
 
@@ -82,6 +82,7 @@ class Player(Base):
 	def __repr__(self):
 		return '<Player(playername=%s, description="%s", song_id=%i)>' % \
 			(self.playername, self.description, self.song_id)
+
 
 class Playlist(Base):
 	__tablename__ = 'playlist'
