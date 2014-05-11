@@ -7,7 +7,7 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 # Imports
-from flask import Flask, request, redirect, url_for, render_template, send_from_directory, abort
+from flask import Flask, request, redirect, url_for, render_template, send_from_directory, abort, jsonify
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, create_engine
 from sqlalchemy.orm import sessionmaker, relationship, backref
@@ -20,6 +20,8 @@ from ess.db import get_session, Song, Artist, Album, Player, Playlist
 # Create aplication
 app = Flask(__name__)
 app.config.from_object(__name__)
+
+_formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
 
 session = get_session()
 
@@ -72,77 +74,82 @@ def deliver_song(song_id):
 
 	abort(404)
 
-# Handle players
-@app.route('/player/', methods = ['GET', 'POST', 'DELETE'])
-def handle_player():
 
-	# Method POST
-	if request.method == 'POST':
-		_formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
-		if request.content_type in _formdata:
-			data = request.form['data']
-			type = request.form['type']
-		else:
-			data = request.data
-			type = request.content_type
-		if not type in ['application/json']:
-			return 'Invalid data type: %s' % type, 400
-		try:
-			data = json.loads(data)
-		except ValueError as e:
-			return e.message, 400
+@app.route('/player', methods = ['POST'])
+def player_register():
+	'''Register a player. The data have to be JSON encoded.
+	Example::
 
-		playername  = data.get('playername')
-		if not playername:
-			return 'playername is missing', 400
+		{"name":"player01", "description":"The first player"}
 
-		description = data.get('description')
+	'''
+	data = request.form.get('data') \
+			if request.content_type in _formdata \
+			else request.data
+	try:
+		data = json.loads(data)
+	except ValueError as e:
+		return e.message, 400
 
-		player = session.query(Player).filter(Player.playername==playername).first()
-		if not player:
-	 		player = Player(
-					playername=playername,
-					description=description)
-			session.add(player)
-			print('>>> Create new player: %s' % playername)
-			session.commit()
-			return 'Created', 201
-		return 'Existed', 200
+	# Get the name of the player. It may not be empty.
+	playername = data.get('name')
+	if not playername:
+		return 'playername is missing', 400
 
-	if request.method == 'GET':
-		playerlist = {}
-		for player in session.query(Player):
-			playerlist[player.playername] = {'description' : player.description,
-					'current' : player.current}
+	# Get an optional description
+	description = data.get('description')
 
-		return  json.dumps(playerlist)
+	# Check if the player already exists
+	player = session.query(Player).filter(Player.playername==playername).first()
+	if player:
+		return '', 204
+	player = Player(
+			playername=playername,
+			description=description)
+	session.add(player)
+	print('>>> Create new player: %s' % playername)
+	session.commit()
+	return '', 201
 
-	if request.method == 'DELETE':
-		_formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
-		if request.content_type in _formdata:
-			data = request.form['data']
-			type = request.form['type']
-		else:
-			data = request.data
-			type = request.content_type
-		if not type in ['application/json']:
-			return 'Invalid data type: %s' % type, 400
-		try:
-			data = json.loads(data)
-		except ValueError as e:
-			return e.message, 400
 
-		playername  = data.get('playername')
-		if not playername:
-			return 'playername is missing', 400
+@app.route('/player', methods = ['GET'])
+def player_list_all():
+	'''List all players.
+	'''
+	playerlist = []
+	for player in session.query(Player):
+		playerlist.append({
+			'name'        : player.playername,
+			'description' : player.description,
+			'current'     : player.current})
 
-		player = session.query(Player).filter(Player.playername==playername).first()
-		if player:
-			session.delete(player)
-			session.commit()
-			return 'Deleted', 200
+	return  jsonify(player=playerlist)
 
+
+@app.route('/player/<name>', methods = ['GET'])
+def player_list(name):
+	'''List all players.
+	'''
+	player = session.query(Player).filter(Player.playername==name).first()
+	return jsonify({
+			'name'        : player.playername,
+			'description' : player.description,
+			'current'     : player.current} \
+					if player else {})
+
+
+@app.route('/player/<name>', methods = ['DELETE'])
+def player_delete(name):
+	'''Delete player.
+	'''
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
 		return 'Do not exist', 404
+
+	session.delete(player)
+	session.commit()
+	return '', 204
+
 
 # Handle current from a player's playlist
 @app.route('/playlist/<playername>/current', methods = ['GET', 'POST'])
@@ -155,7 +162,6 @@ def handle_current(playername):
 		return 'Do not exist', 404
 
 	if request.method == 'POST':
-		_formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
 		if request.content_type in _formdata:
 			data = request.form['data']
 			type = request.form['type']
