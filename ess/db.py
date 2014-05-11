@@ -92,7 +92,6 @@ class Playlist(Base):
 	song_id    = Column('song_id', None, ForeignKey('music_song.id'))
 
 	song       = relationship("Song",  backref=backref('playlist'))
-	player     = relationship("Player", backref=backref('playerlist'))
 
 	def __repr__(self):
 		return '<(playername=%s, order="%i", song_id=%i)>' % \
