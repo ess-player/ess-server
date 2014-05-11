@@ -42,7 +42,7 @@ class Album(Base):
 	name      = Column('name', String(255), nullable=False)
 	artist_id = Column('artist_id', None, ForeignKey('music_artist.id'))
 
-	artist    = relationship("Artist", backref=backref('music_albums'))
+	artist    = relationship("Artist", backref=backref('music_album'))
 
 	def __repr__(self):
 		return '<Album(id=%i, name="%s", artist_id=%i)>' % \
@@ -63,8 +63,8 @@ class Song(Base):
 	artist_id    = Column('artist_id', None, ForeignKey('music_artist.id'))
 	album_id     = Column('album_id', None, ForeignKey('music_album.id'))
 
-	artist       = relationship("Artist", backref=backref('music_songs'))
-	album        = relationship("Album",  backref=backref('music_songs'))
+	artist       = relationship("Artist", backref=backref('music_song'))
+	album        = relationship("Album",  backref=backref('music_song'))
 
 	def __repr__(self):
 		return '<Song(id=%i, title="%s", artist_id=%i)>' % \
@@ -77,7 +77,7 @@ class Player(Base):
 	description = Column('description', String(255))
 	song_id     = Column('song_id', None, ForeignKey('music_song.id'))
 
-	current     = relationship("Song", backref=backref('players'))
+	current     = relationship("Song", backref=backref('player'))
 
 	def __repr__(self):
 		return '<Player(playername=%s, description="%s", song_id=%i)>' % \
@@ -91,7 +91,9 @@ class Playlist(Base):
 			primary_key=True)
 	song_id    = Column('song_id', None, ForeignKey('music_song.id'))
 
-	song       = relationship("Song",  backref=backref('playlists'))
+	song       = relationship("Song",  backref=backref('playlist'))
+	player     = relationship("Player", backref=backref('playerlist'),
+			uselist=False)
 
 	def __repr__(self):
 		return '<(playername=%s, order="%i", song_id=%i)>' % \
