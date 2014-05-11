@@ -142,4 +142,47 @@ def handle_player():
 			session.commit()
 			return 'Deleted', 201
 
-		return 'Do not exists', 201
+		return 'Do not exist', 404
+
+# Handle current from a player's playlist
+@app.route('/playlist/<playername>/current', methods = ['GET', 'POST'])
+def handle_current(playername):
+
+	if request.method == 'GET':
+		player = session.query(Player).filter(Player.playername==playername).first()
+		if player:
+			return json.dumps({'id' : player.current.id})
+		return 'Do not exists', 404
+
+	if request.method == 'POST':
+		_formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
+		if request.content_type in _formdata:
+			data = request.form['data']
+			type = request.form['type']
+		else:
+			data = request.data
+			type = request.content_type
+		if not type in ['application/json']:
+			return 'Invalid data type: %s' % type, 400
+		try:
+			data = json.loads(data)
+		except ValueError as e:
+			return e.message, 400
+
+		id  = data.get('id')
+		if not id:
+			return 'Song id is missing', 400
+
+		player = session.query(Player).filter(Player.playername==playername).first()
+		if not player:
+			return 'Player does not exist', 400
+
+		entry = session.query(Playlist).filter(Playlist.playername==playername,
+				Playlist.song_id==id).first()
+
+		if not entry:
+				return 'Playlist does not contain song', 400
+
+		player.current = entry.song
+		session.commit()
+		return 'Change current', 200
