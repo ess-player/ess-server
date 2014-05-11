@@ -107,7 +107,7 @@ def handle_player():
 			print('>>> Create new player: %s' % playername)
 			session.commit()
 			return 'Created', 201
-		return 'Existed', 201
+		return 'Existed', 200
 
 	if request.method == 'GET':
 		playerlist = {}
@@ -140,7 +140,7 @@ def handle_player():
 		if player:
 			session.delete(player)
 			session.commit()
-			return 'Deleted', 201
+			return 'Deleted', 200
 
 		return 'Do not exist', 404
 
@@ -152,7 +152,7 @@ def handle_current(playername):
 		player = session.query(Player).filter(Player.playername==playername).first()
 		if player:
 			return json.dumps({'id' : player.current.id})
-		return 'Do not exists', 404
+		return 'Do not exist', 404
 
 	if request.method == 'POST':
 		_formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
@@ -175,7 +175,7 @@ def handle_current(playername):
 
 		player = session.query(Player).filter(Player.playername==playername).first()
 		if not player:
-			return 'Player does not exist', 400
+			return 'Player does not exist', 404
 
 		entry = session.query(Playlist).filter(Playlist.playername==playername,
 				Playlist.song_id==id).first()
