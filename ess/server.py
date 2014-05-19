@@ -176,7 +176,73 @@ def playlist_list(name):
 			'list'        : list,
 			'current'     : current})
 
+@app.route('/playlist/<name>', methods = ['POST'])
+def playlist_post(name):
+	'''Post a playerlist for the player *name*.
+	'''
 
+	# Check if player exists
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return 'Do not exist', 404
+
+	data = request.form.get('data') \
+			if request.content_type in _formdata \
+			else request.data
+	try:
+		data = json.loads(data)
+	except Exception as e:
+		return e.message, 400
+
+	# Get list of song_ids.
+	list = data.get('list')
+	if not list:
+		return 'list is missing', 400
+
+	# Get optionally current.
+	current = data.get('current')
+	if current and current not in list:
+		return 'Playlist does not contain Song', 400
+
+	# Check if the playlist already exists
+	playlist = session.query(Playlist).filter(Playlist.playername==name).all()
+	if len(playlist)!=0:
+		return 'playlist exists', 400
+	# Create playlist
+	for index in range(len(list)):
+		session.add(Playlist(order=index+1,
+			playername=name,
+			song_id = list[index]))
+
+	# Set Current
+	song = session.query(Song).filter(Song.id==current).first()
+	if not song:
+		return 'Database does not contain song', 400
+	player.current = song
+
+	print('>>> Create new playlist for %s' % name)
+	session.commit()
+	return '', 201
+
+@app.route('/playlist/<name>', methods = ['DELETE'])
+def playlist_delete(name):
+	'''Delete playlist.
+	'''
+	# Get player
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return 'Do not exist', 404
+
+	# Change current to None
+	if player.current:
+		player.current = None
+
+	# Get playlist and delete it
+	playlist = session.query(Playlist).filter(Player.playername==name)
+	for entry in playlist:
+		session.delete(entry)
+	session.commit()
+	return '', 204
 
 # Handle current from a player's playlist
 @app.route('/playlist/<playername>/current', methods = ['GET'])
