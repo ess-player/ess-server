@@ -128,7 +128,7 @@ def player_list_all():
 
 @app.route('/player/<name>', methods = ['GET'])
 def player_list(name):
-	'''List all players.
+	'''List player *name*.
 	'''
 	player = session.query(Player).filter(Player.playername==name).first()
 	return jsonify({
@@ -149,6 +149,33 @@ def player_delete(name):
 	session.delete(player)
 	session.commit()
 	return '', 204
+
+@app.route('/playlist/<name>', methods = ['GET'])
+def playlist_list(name):
+	'''List playlist from player *name*.
+	'''
+
+	# Get Player and Current
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return 'Do not exist', 404
+
+	if player.current:
+		current = player.current.id
+	else:
+		current = None
+
+	# Get Songs
+	playlist = session.query(Playlist).filter(Playlist.playername==name)
+
+	list = []
+	for entry in playlist:
+		list.append(entry.song_id)
+
+	return jsonify({
+			'list'        : list,
+			'current'     : current})
+
 
 
 # Handle current from a player's playlist
