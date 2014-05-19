@@ -238,7 +238,7 @@ def playlist_delete(name):
 		player.current = None
 
 	# Get playlist and delete it
-	playlist = session.query(Playlist).filter(Player.playername==name)
+	playlist = session.query(Playlist).filter(Playlist.playername==name)
 	for entry in playlist:
 		session.delete(entry)
 	session.commit()
