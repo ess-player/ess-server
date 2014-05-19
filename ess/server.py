@@ -121,7 +121,7 @@ def player_list_all():
 		playerlist.append({
 			'name'        : player.playername,
 			'description' : player.description,
-			'current'     : player.current})
+			'current'     : player.current.id if player.current else None})
 
 	return  jsonify(player=playerlist)
 
@@ -134,7 +134,7 @@ def player_list(name):
 	return jsonify({
 			'name'        : player.playername,
 			'description' : player.description,
-			'current'     : player.current} \
+			'current'     : player.current.id if player.current else None} \
 					if player else {})
 
 
