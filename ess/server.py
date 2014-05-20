@@ -208,6 +208,11 @@ def player_delete(name):
 	if not player:
 		return 'Do not exist', 404
 
+	# Get playlist and delete it
+	playlist = session.query(Playlist).filter(Playlist.playername==name)
+	for entry in playlist:
+		session.delete(entry)
+	session.commit()
 	session.delete(player)
 	session.commit()
 	return '', 204
