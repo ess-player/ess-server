@@ -239,6 +239,23 @@ def playlist_list_all():
 
 	return jsonify(all)
 
+@app.route('/playlist', methods = ['DELETE'])
+def playlist_delete_all():
+	''' Delete playlists of all players
+	'''
+
+	# Change current of alle player to None
+	for player in session.query(Player):
+		if player.current:
+			player.current = None
+
+	# Get all playlistentries and delete them
+	for entry in session.query(Playlist):
+		session.delete(entry)
+	session.commit()
+	return '', 204
+
+
 @app.route('/playlist/<name>', methods = ['GET'])
 def playlist_list(name):
 	'''List playlist from player *name*.
