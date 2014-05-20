@@ -61,6 +61,60 @@ def list ():
 	# Return the list of data
 	return render_template('database.html', entries=entries, searchword=s)
 
+@app.route('/search', methods = ['POST'])
+def song_search():
+
+	data = request.form.get('data') \
+			if request.content_type in _formdata \
+			else request.data
+	try:
+		data = json.loads(data)
+	except Exception as e:
+		return e.message, 400
+
+	search = data.get('search')
+	if not search:
+		return 'searchword is missing', 400
+
+	searchlist = search.split()
+	entries = session.query(Song)\
+				.outerjoin(Album)\
+				.outerjoin(Artist)
+	for s in searchlist:
+		hs = '%' + s + '%'
+		entries  = entries\
+				.filter(or_(Song.title.like(hs),
+							Song.genre.like(hs),
+							Song.date.like(hs),
+							Album.name.like(hs),
+							Artist.name.like(hs)))
+
+
+
+	entries = entries.order_by(Song.title)
+	songs = []
+	for entry in entries:
+		if entry.artist:
+			artist_name = entry.artist.name
+		else:
+			artist_name = None
+		if entry.album:
+			album_name = entry.album.name
+		else:
+			album_name = None
+		songs.append({
+			'song'         : entry.title,
+			'artist'       : artist_name,
+			'album'        : album_name,
+			'date'         : entry.date,
+			'genre'        : entry.genre,
+			'tracknumber'  : entry.tracknumber,
+			'times_played' : entry.times_played
+			})
+
+	return jsonify({'songs': songs})
+
+
 # Deliver Songs to player
 @app.route('/song/<int:song_id>')
 def deliver_song(song_id):
