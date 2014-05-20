@@ -77,10 +77,18 @@ def song_search():
 		return 'searchword is missing', 400
 
 	searchlist = search.split()
+
+	hs = '%' + searchlist[0]  + '%'
 	entries = session.query(Song)\
 				.outerjoin(Album)\
-				.outerjoin(Artist)
-	for s in searchlist:
+				.outerjoin(Artist)\
+				.filter(or_(Song.title.like(hs),
+							Song.genre.like(hs),
+							Song.date.like(hs),
+							Album.name.like(hs),
+							Artist.name.like(hs)))
+
+	for s in searchlist[1:]:
 		hs = '%' + s + '%'
 		entries  = entries\
 				.filter(or_(Song.title.like(hs),
