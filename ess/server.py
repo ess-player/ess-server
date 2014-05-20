@@ -150,6 +150,33 @@ def player_delete(name):
 	session.commit()
 	return '', 204
 
+@app.route('/playlist', methods = ['GET'])
+def playlist_list_all():
+	''' List playlists of all players
+	'''
+
+	all = {}
+
+	for player in session.query(Player):
+
+		# Get Current
+		if player.current:
+			current = player.current.id
+		else:
+			current = None
+
+		# Get Songs
+		playlist = session.query(Playlist)\
+				.filter(Playlist.playername==player.playername)
+
+		list = []
+		for entry in playlist:
+			list.append(entry.song_id)
+
+		all[player.playername] = {'list' : list, 'current' : current}
+
+	return jsonify(all)
+
 @app.route('/playlist/<name>', methods = ['GET'])
 def playlist_list(name):
 	'''List playlist from player *name*.
