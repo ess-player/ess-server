@@ -8,13 +8,8 @@ sys.setdefaultencoding('utf8')
 
 # Imports
 from flask import Flask, request, redirect, url_for, render_template, send_from_directory, abort, jsonify
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, create_engine
-from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy import or_
-from sqlalchemy.orm import joinedload
-import sys
-import subprocess, json
+import json
 from ess.db import get_session, Song, Artist, Album, Player, Playlist
 
 # Create aplication
@@ -22,8 +17,6 @@ app = Flask(__name__)
 app.config.from_object(__name__)
 
 _formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
-
-session = get_session()
 
 # View method for entries
 @app.route('/', methods = ['GET', 'POST'])
@@ -44,7 +37,7 @@ def list ():
 	s = request.args.get('s', '')
 	if s:
 		hs = '%' + s + '%'
-		entries = session.query(Song)\
+		entries = get_session().query(Song)\
 				.outerjoin(Album)\
 				.outerjoin(Artist)\
 				.filter(or_(Song.title.like(hs),
@@ -56,10 +49,11 @@ def list ():
 				.all()
 
 	else:
-		entries = session.query(Song).order_by(Song.title).all()
+		entries = get_session().query(Song).order_by(Song.title).all()
 
 	# Return the list of data
 	return render_template('database.html', entries=entries, searchword=s)
+
 
 @app.route('/search', methods = ['POST'])
 def song_search():
@@ -79,7 +73,7 @@ def song_search():
 	searchlist = search.split()
 
 	hs = '%' + searchlist[0]  + '%'
-	entries = session.query(Song)\
+	entries = get_session().query(Song)\
 				.outerjoin(Album)\
 				.outerjoin(Artist)\
 				.filter(or_(Song.title.like(hs),
@@ -96,8 +90,6 @@ def song_search():
 							Song.date.like(hs),
 							Album.name.like(hs),
 							Artist.name.like(hs)))
-
-
 
 	entries = entries.order_by(Song.title)
 	songs = []
@@ -127,7 +119,7 @@ def song_search():
 @app.route('/song/<int:song_id>')
 def deliver_song(song_id):
 
-	song = session.query(Song).filter(Song.id ==
+	song = get_session().query(Song).filter(Song.id ==
 			song_id).first()
 
 	if song:
@@ -162,6 +154,7 @@ def player_register():
 	description = data.get('description')
 
 	# Check if the player already exists
+	session = get_session()
 	player = session.query(Player).filter(Player.playername==playername).first()
 	if player:
 		return '', 204
@@ -179,7 +172,7 @@ def player_list_all():
 	'''List all players.
 	'''
 	playerlist = []
-	for player in session.query(Player):
+	for player in get_session().query(Player):
 		playerlist.append({
 			'name'        : player.playername,
 			'description' : player.description,
@@ -192,7 +185,7 @@ def player_list_all():
 def player_list(name):
 	'''List player *name*.
 	'''
-	player = session.query(Player).filter(Player.playername==name).first()
+	player = get_session().query(Player).filter(Player.playername==name).first()
 	return jsonify({
 			'name'        : player.playername,
 			'description' : player.description,
@@ -204,6 +197,7 @@ def player_list(name):
 def player_delete(name):
 	'''Delete player.
 	'''
+	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
 		return 'Do not exist', 404
@@ -224,6 +218,7 @@ def playlist_list_all():
 
 	all = {}
 
+	session = get_session()
 	for player in session.query(Player):
 
 		# Get Current
@@ -244,10 +239,12 @@ def playlist_list_all():
 
 	return jsonify(all)
 
+
 @app.route('/playlist', methods = ['DELETE'])
 def playlist_delete_all():
 	''' Delete playlists of all players
 	'''
+	session = get_session()
 
 	# Change current of alle player to None
 	for player in session.query(Player):
@@ -265,6 +262,7 @@ def playlist_delete_all():
 def playlist_list(name):
 	'''List playlist from player *name*.
 	'''
+	session = get_session()
 
 	# Get Player and Current
 	player = session.query(Player).filter(Player.playername==name).first()
@@ -287,10 +285,12 @@ def playlist_list(name):
 			'list'        : list,
 			'current'     : current})
 
+
 @app.route('/playlist/<name>', methods = ['POST'])
 def playlist_post(name):
 	'''Post a playerlist for the player *name*.
 	'''
+	session = get_session()
 
 	# Check if player exists
 	player = session.query(Player).filter(Player.playername==name).first()
@@ -335,10 +335,12 @@ def playlist_post(name):
 	session.commit()
 	return '', 201
 
+
 @app.route('/playlist/<name>', methods = ['DELETE'])
 def playlist_delete(name):
 	'''Delete playlist.
 	'''
+	session = get_session()
 	# Get player
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
@@ -355,10 +357,11 @@ def playlist_delete(name):
 	session.commit()
 	return '', 204
 
+
 # Handle current from a player's playlist
 @app.route('/playlist/<playername>/current', methods = ['GET'])
 def current_playing_get(playername):
-	player = session.query(Player).filter(Player.playername==playername).first()
+	player = get_session().query(Player).filter(Player.playername==playername).first()
 	if player:
 		return json.dumps({'id' : player.current.id if player.current else None})
 	return 'Do not exist', 404
@@ -383,6 +386,7 @@ def current_playing_set(playername):
 	if not id:
 		return 'Song id is missing', 400
 
+	session = get_session()
 	player = session.query(Player).filter(Player.playername==playername).first()
 	if not player:
 		return 'Player does not exist', 404

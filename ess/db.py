@@ -14,9 +14,15 @@ from sqlalchemy.schema import PrimaryKeyConstraint
 Base = declarative_base()
 
 # Init
-def get_session():
+def init():
+	global engine
 	engine = create_engine(config.DATABASE)
 	Base.metadata.create_all(engine)
+
+
+def get_session():
+	if not 'engine' in globals():
+		init()
 	Session = sessionmaker(bind=engine)
 	return Session()
 
