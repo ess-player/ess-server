@@ -103,7 +103,7 @@ def song_search():
 		else:
 			album_name = None
 		songs.append({
-			'song'         : entry.title,
+			'title'        : entry.title,
 			'artist'       : artist_name,
 			'album'        : album_name,
 			'date'         : entry.date,
