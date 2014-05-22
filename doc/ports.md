@@ -1,5 +1,5 @@
 | Done | HTTP method | URL                            | Description                               | Input/Output                                                                       |
-|======|=============|================================|===========================================|====================================================================================|
+|------|-------------|--------------------------------|-------------------------------------------|------------------------------------------------------------------------------------|
 | X    | POST        | /player                        | Register a player                         | Input=JSON{"name":name,"description":description}                                  |
 | X    | GET         | /player                        | Name and description of all players       | Output=JSON {"player":[{"current":current,"name":name,"description":description},...]} |
 | X    | DELETE      | /player                        | Delete all players                        | -                                                                                  |
