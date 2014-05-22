@@ -68,28 +68,30 @@ def song_search():
 
 	search = data.get('search')
 	if not search:
-		return 'searchword is missing', 400
+		entries = get_session().query(Song)
+	else:
+		searchlist = search.split()
+		if not searchlist:
+			entries = get_session().query(Song)
+		else:
+			hs = '%' + searchlist[0]  + '%'
+			entries = get_session().query(Song)\
+						.outerjoin(Album)\
+						.outerjoin(Artist)\
+						.filter(or_(Song.title.like(hs),
+									Song.genre.like(hs),
+									Song.date.like(hs),
+									Album.name.like(hs),
+									Artist.name.like(hs)))
 
-	searchlist = search.split()
-
-	hs = '%' + searchlist[0]  + '%'
-	entries = get_session().query(Song)\
-				.outerjoin(Album)\
-				.outerjoin(Artist)\
-				.filter(or_(Song.title.like(hs),
-							Song.genre.like(hs),
-							Song.date.like(hs),
-							Album.name.like(hs),
-							Artist.name.like(hs)))
-
-	for s in searchlist[1:]:
-		hs = '%' + s + '%'
-		entries  = entries\
-				.filter(or_(Song.title.like(hs),
-							Song.genre.like(hs),
-							Song.date.like(hs),
-							Album.name.like(hs),
-							Artist.name.like(hs)))
+			for s in searchlist[1:]:
+				hs = '%' + s + '%'
+				entries  = entries\
+						.filter(or_(Song.title.like(hs),
+									Song.genre.like(hs),
+									Song.date.like(hs),
+									Album.name.like(hs),
+									Artist.name.like(hs)))
 
 	entries = entries.order_by(Song.title)
 	songs = []
@@ -103,6 +105,7 @@ def song_search():
 		else:
 			album_name = None
 		songs.append({
+			'id'           : entry.id,
 			'title'        : entry.title,
 			'artist'       : artist_name,
 			'album'        : album_name,

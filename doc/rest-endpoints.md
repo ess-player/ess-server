@@ -14,4 +14,4 @@
 |      | GET         | /song/[id]                         | Deliver Song with id [id]                 | Output = Song as file |
 |      | GET         | /                                  | -                                         | - |
 |      | POST        | /                                  | -                                         | - |
-| X    | POST        | /search                            | Post search and get matching result       | Input = JSON{"search":searchword}; Output = JSON{"songs":[{"album":album, "artist":artist, "date":date, "genre":genre, "title":title, "played_time":played_time, "tracknumber":tracknumber}], ...} |
+| X    | POST        | /search                            | Post search and get matching result       | Input = JSON{"search":searchword}; Output = JSON{"songs":[{"album":album, "artist":artist, "date":date, "genre":genre, "id":id, "title":title, "played_time":played_time, "tracknumber":tracknumber}], ...} |
