@@ -7,11 +7,11 @@ reload(sys)
 sys.setdefaultencoding('utf8')
 
 # Imports
-from flask import Flask, request, redirect, url_for, render_template, send_from_directory, abort, jsonify
+from flask import Flask, request, redirect, url_for, render_template, jsonify, stream_with_context, Response
 from sqlalchemy import or_
 import json
 from ess.db import get_session, Song, Artist, Album, Player, Playlist
-
+import os.path
 # Create aplication
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -122,11 +122,18 @@ def deliver_song(song_id):
 	song = get_session().query(Song).filter(Song.id ==
 			song_id).first()
 
-	if song:
-		[path,filename] = song.uri.rsplit('/' , 1)
-		return send_from_directory(path, filename)
+	if not song:
+		return '', 404
 
-	abort(404)
+	def generate():
+		with open(song.uri,'rb') as f:
+			part = f.read(1024)
+			while part:
+				yield part
+				part = f.read(128*1024)
+ 	response = Response(stream_with_context(generate()), mimetype='application/octet-stream')
+	response.headers['content-length'] = os.path.getsize(song.uri)
+	return response
 
 
 @app.route('/player', methods = ['POST'])

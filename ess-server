@@ -1,4 +1,4 @@
 #!/bin/env python
 # -*- coding: utf-8 -*-
 from ess import server
-server.app.run(debug=True, port=5001, threaded=True)
+server.app.run(host='0.0.0.0', debug=True, port=5001, threaded=True)
