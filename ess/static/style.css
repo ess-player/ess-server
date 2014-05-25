@@ -29,23 +29,23 @@ div.header {
 	font-size: larger;
 }
 
-.search img {
+input[type=image] {
 	width: 32px;
-	margin-bottom: -10px;
+	margin-bottom: -20px;
 }
 
-#searchresult table {
+table {
 	width: 100%;
 }
 
-.song {
+tr {
 	width: 100%;
 }
 
-.song:hover {
+tr:hover {
 	background-color: silver;
 }
 
-.song td {
+td {
 	padding: 5px;
 }

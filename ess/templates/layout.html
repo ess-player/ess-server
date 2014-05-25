@@ -3,8 +3,11 @@
 	<head>
 		<title>ESS</title>
 		<link rel=stylesheet type=text/css href="{{ url_for('static', filename='style.css') }}">
-		<script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
-		<script src="{{ url_for('static', filename='func.js') }}"></script>
+
+		 <script src="{{ url_for('static', filename='lib/jquery.min.js') }}"></script>
+		 <script src="{{ url_for('static', filename='lib/react.min.js') }}"></script>
+		 <script src="{{ url_for('static', filename='lib/JSXTransformer.js') }}"></script>
+
 	</head>
 	<body>
 	{% block body %}{% endblock %}
