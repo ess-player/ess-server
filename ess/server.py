@@ -8,7 +8,7 @@ sys.setdefaultencoding('utf8')
 
 # Imports
 from flask import Flask, request, redirect, url_for, render_template, jsonify, stream_with_context, Response
-from sqlalchemy import or_
+from sqlalchemy import or_, and_, desc
 import json
 from ess.db import get_session, Song, Artist, Album, Player, Playlist
 import os.path
@@ -68,11 +68,15 @@ def song_search():
 
 	search = data.get('search')
 	if not search:
-		entries = get_session().query(Song)
+		entries = get_session().query(Song)\
+					.outerjoin(Album)\
+					.outerjoin(Artist)
 	else:
 		searchlist = search.split()
 		if not searchlist:
-			entries = get_session().query(Song)
+			entries = get_session().query(Song)\
+					.outerjoin(Album)\
+					.outerjoin(Artist)
 		else:
 			hs = '%' + searchlist[0]  + '%'
 			entries = get_session().query(Song)\
@@ -93,7 +97,7 @@ def song_search():
 									Album.name.like(hs),
 									Artist.name.like(hs)))
 
-	entries = entries.order_by(Song.title)
+	entries = entries.order_by(Artist.name)
 	songs = []
 	for entry in entries:
 		if entry.artist:
@@ -389,13 +393,115 @@ def playlist_entry_up(name,place):
 	if not entry2:
 		return '', 204
 
-	entry1.order = 0
-	entry2.order = place
+	h = entry1.song_id
+	entry1.song_id = entry2.song_id
+	entry2.song_id = h
 	session.commit()
-	entry1.order = place + 1
+	return '', 204
+
+
+@app.route('/playlist/<name>/<int:place>/down')
+def playlist_entry_down(name,place):
+	'''Change playlistentry from playlist playlist on place place with
+	playlistentry on place place-1'''
+
+	if place == 1:
+		return '204'
+
+	session = get_session()
+	# Get player
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return 'player not found', 404
+
+	# Get playlist and entries
+	playlist = session.query(Playlist).filter(Playlist.playername==name)
+	if not playlist.count():
+		return 'playlist not found', 404
+	entry1   = playlist.filter(Playlist.order==place).first()
+	if not entry1:
+		return 'entry not found', 404
+	entry2   = playlist.filter(Playlist.order==place-1).first()
+
+	h = entry1.song_id
+	entry1.song_id = entry2.song_id
+	entry2.song_id = h
+	session.commit()
+	return '', 204
+
+
+@app.route('/playlist/<name>/<int:place>', methods = ['DELETE'])
+def playlist_entry_delete(name,place):
+	'''Delete playlistentry from playlist on place place'''
+
+	session = get_session()
+	# Get player
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return 'player not found', 404
+
+	# Get playlist and entries
+	playlist =	session.query(Playlist).filter(and_(Playlist.playername==name,
+			Playlist.order>=place))
+
+	for entry in playlist.order_by(Playlist.order):
+		hentry = playlist.filter(Playlist.order==entry.order+1).first()
+		if hentry:
+			entry.song_id = hentry.song_id
+		else:
+			session.delete(entry)
+	session.commit()
+	return '', 204
+
+
+@app.route('/playlist/<name>/<int:place>', methods = ['PUT'])
+def playlist_entry_add(name,place):
+	'''Add playlistentry to playlist to place place'''
+	if request.content_type in _formdata:
+		data = request.form['data']
+		type = request.form['type']
+	else:
+		data = request.data
+		type = request.content_type
+	if not type in ['application/json']:
+		return 'Invalid data type: %s' % type, 400
+	try:
+		data = json.loads(data)
+	except Exception as e:
+		return e.message, 400
+
+	id  = data.get('id')
+	if not id:
+		return 'Song id is missing', 400
+
+	session = get_session()
+	# Get player
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return 'player not found', 404
+
+	# Get playlist and add entry
+	playlist =	session.query(Playlist).filter(Playlist.playername==name)
+	size = playlist.count()
+	if place > size+1:
+		return 'place too big', 400
+
+	session.add(Playlist(order=playlist.count()+1,
+		playername=name))
+
+	# Get size of playlist (changed)
+	size = playlist.count()
+	# Shift entries of playlist
+	for entry in playlist.filter(Playlist.order>=place).order_by(desc(Playlist.order)):
+		if entry.order != place:
+			entry.song_id = playlist.filter(Playlist.order==entry.order-1)\
+					.first().song_id
+		else:
+			entry.song_id = id
 	session.commit()
 
-	return '', 204 
+	return '', 204
+
 
 # Handle current from a player's playlist
 @app.route('/playlist/<playername>/current', methods = ['GET'])
