@@ -367,6 +367,35 @@ def playlist_delete(name):
 	session.commit()
 	return '', 204
 
+@app.route('/playlist/<name>/<int:place>/up')
+def playlist_entry_up(name,place):
+	'''Change playlistentry from playlist playlist on place place with
+	playlistentry on place place+1'''
+
+	session = get_session()
+	# Get player
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return 'player not found', 404
+
+	# Get playlist and entries
+	playlist = session.query(Playlist).filter(Playlist.playername==name)
+	if not playlist.count():
+		return 'playlist not found', 404
+	entry1   = playlist.filter(Playlist.order==place).first()
+	if not entry1:
+		return 'entry not found', 404
+	entry2   = playlist.filter(Playlist.order==place+1).first()
+	if not entry2:
+		return '', 204
+
+	entry1.order = 0
+	entry2.order = place
+	session.commit()
+	entry1.order = place + 1
+	session.commit()
+
+	return '', 204 
 
 # Handle current from a player's playlist
 @app.route('/playlist/<playername>/current', methods = ['GET'])
