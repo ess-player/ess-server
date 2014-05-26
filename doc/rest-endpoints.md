@@ -17,5 +17,5 @@
 | X    | POST        | /search                             | Post search and get matching result                                     | Input = JSON{"search":searchword}; Output = JSON{"songs":[{"album":album, "artist":artist, "date":date, "genre":genre, "id":id, "title":title, "played_time":played_time, "tracknumber":tracknumber}], ...} |
 |      | GET         | /playlist/[playername]/[place]/up   | Move playlistentry of player [playername] on place [place] to [place]-1 | - |
 |      | GET         | /playlist/[playername]/[place]/down | Move playlistentry of player [playername] on place [place] to [place]-1 | - |
-|      | POST        | /playlist/[playername]/[place]      | Post new playlistentry on place [place] of player [playername]          | Input = JSON{"id":song_id} |
+|      | PUT         | /playlist/[playername]/[place]      | Post new playlistentry on place [place] of player [playername]          | Input = JSON{"id":song_id} |
 |      | DELETE      | /playlist/[playername]/[place]      | Delete playlistentry on place [place] of player [playername]            | - |
