@@ -81,26 +81,40 @@ class Player(Base):
 
 	playername  = Column('playername', String(255), primary_key=True)
 	description = Column('description', String(255))
-	song_id     = Column('song_id', None, ForeignKey('music_song.id'))
-
-	current     = relationship("Song", backref=backref('player'))
 
 	def __repr__(self):
-		return '<Player(playername=%s, description="%s", song_id=%i)>' % \
-			(self.playername, self.description, self.song_id)
+		return '<Player(playername=%s, description="%s", playlist_id=%i)>' % \
+			(self.playername, self.description, self.playlist_id)
 
 
 class Playlist(Base):
 	__tablename__ = 'playlist'
 
-	order      = Column('order', Integer(unsigned=True), primary_key=True)
-	playername = Column('playername', None, ForeignKey('player.playername'),
-			primary_key=True)
-	song_id    = Column('song_id', None, ForeignKey('music_song.id'))
-
-	song       = relationship("Song",  backref=backref('playlist'))
+	id          = Column('id', Integer(unsigned=True), primary_key=True,
+			autoincrement=True)
+	playername  = Column('playername', None, ForeignKey('player.playername'))
+	song_id     = Column('song_id', None, ForeignKey('music_song.id'), nullable=False)
+	song        = relationship("Song",  backref=backref('playlist'))
+	next_id     = Column(Integer(unsigned=True), ForeignKey('playlist.id'), unique=True)
+	next        = relationship("Playlist", primaryjoin=next_id == id, uselist=False)
+	previous_id = Column(Integer(unsigned=True), ForeignKey('playlist.id'), unique=True)
+	previous    = relationship("Playlist", primaryjoin=previous_id == id, uselist=False)
 
 	def __repr__(self):
-		return '<(playername=%s, order="%i", song_id=%i)>' % \
-			(self.playername, self.order, self.song_id)
+		return '<(playername=%s, song_id=%i, next_id=%i, previous_id=%i)>' % \
+			(self.playername, self.song_id, self.next_id , self.previous_id)
 
+
+class Current(Base):
+	__tablename__ = 'current'
+	
+	playername  = Column('playername', None, ForeignKey('player.playername'),
+			primary_key=True)
+	playlist_id = Column('playlist_id', None, ForeignKey('playlist.id'),
+			nullable = False)
+	Playlist    = relationship("Playlist",
+					backref=backref('playlist'), uselist=True)
+
+	def __repr__(self):
+		return '<(playername=%s, playlist_id=%i)>' % \
+				(self.playername, self.playlist_id)
