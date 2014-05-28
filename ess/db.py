@@ -109,7 +109,7 @@ class Current(Base):
 			primary_key=True)
 	playlist_id = Column('playlist_id', ForeignKey('playlist.id'),
 			nullable = False)
-	Playlist    = relationship("Playlist",
+	playlist    = relationship("Playlist",
 					backref=backref('playlist'), uselist=True)
 
 	def __repr__(self):

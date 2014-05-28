@@ -243,8 +243,6 @@ def player_delete(name):
 
 	# Delete playlists
 	for entry in session.query(Playlist).filter(Playlist.playername==name):
-		entry.next = None
-		entry.previous = None
 		session.delete(entry)
 	session.commit()
 
@@ -276,13 +274,9 @@ def playlist_list_all():
 				.filter(Playlist.playername==player.playername)
 
 		# Collect songs of playlist
-		if not playlist.count():
-			list = []
-		else:
-			entry = playlist.filter(Playlist.previous_id==None).first()
-			list = [{'playlist_id':entry.id, 'song_id':entry.song_id}]
-			while entry.next_id!=None:
-				entry = playlist.filter(Playlist.id==entry.next_id).first()
+		list = []
+		if playlist.count():
+			for entry in playlist.order_by(Playlist.order):
 				list.append({'playlist_id':entry.id, 'song_id':entry.song_id})
 
 		all[player.playername] = {'list' : list, 'current' : curstr}
@@ -303,8 +297,6 @@ def playlist_delete_all():
 
 	# Delete playlists
 	for entry in session.query(Playlist):
-		entry.next = None
-		entry.previous = None
 		session.delete(entry)
 	session.commit()
 	return '', 204
@@ -334,13 +326,9 @@ def playlist_list(name):
 			.filter(Playlist.playername==name)
 
 	# Collect songs of playlist
-	if not playlist.count():
-		list = []
-	else:
-		entry = playlist.filter(Playlist.previous_id==None).first()
-		list = [{'playlist_id':entry.id, 'song_id':entry.song_id}]
-		while entry.next_id!=None:
-			entry = playlist.filter(Playlist.id==entry.next_id).first()
+	list = []
+	if playlist.count():
+		for entry in playlist.order_by(Playlist.order):
 			list.append({'playlist_id':entry.id, 'song_id':entry.song_id})
 
 	return jsonify({
@@ -378,18 +366,13 @@ def playlist_post(name):
 		return 'playlist exists', 400
 
 	# Create playlist
-	h1 = Playlist(playername=name, song_id=list[0])
-	session.add(h1)
+	for index in range(0,len(list)):
+		session.add(Playlist(order=index+1, playername=name, song_id =
+			list[index]))
+
+	print('>>> Create new playlist for %s' % name)
 	session.commit()
-	for index in range(1,len(list)):
-		h2 = Playlist(playername=name, song_id=list[index], previous_id=h1.id)
-		session.add(h2)
-		session.commit()
-		print('>>> h2_id = %i' % h2.id)
-		h1.next_id = h2.id
-		session.commit()
-		h1 = h2
-	return '', 200
+	return '', 201
 
 
 @app.route('/playlist/<name>', methods = ['DELETE'])
@@ -409,8 +392,6 @@ def playlist_delete(name):
 
 	# Delete playlists
 	for entry in session.query(Playlist).filter(Playlist.playername==name):
-		entry.next = None
-		entry.previous = None
 		session.delete(entry)
 	session.commit()
 
@@ -432,23 +413,14 @@ def playlist_entry_up(name,place):
 	if not playlist.count():
 		return 'playlist not found', 404
 
-	# Get playlistentry on place
-	entry = playlist.filter(Playlist.previous_id==None).first()
-	for i in range(1,place):
-		if entry.next_id ==None:
-			return '', 400
-		entry = playlist.filter(Playlist.id==entry.next_id).first()
-
-	# Switch entries
-	prev = playlist.filter(Playlist.id==entry.previous_id).first()
-	next = entry.next_id
-	entry.previous_id = prev.previous_id
-	entry.next_id = prev.id
-	prev.previous_id = entry.id
-	prev.next_id = next
-	session.flush()
-
-
+	entry1 = playlist.filter(Playlist.order==place).first()
+	if not entry1:
+		return 'entry not found', 404
+	entry2 = playlist.filter(Playlist.order==place+1).first()
+	if not entry2:
+		return '', 204
+	entry1.order, entry2.order = entry2.order, entry1.order
+	session.commit()
 	return '', 204
 
 
@@ -474,10 +446,7 @@ def playlist_entry_down(name,place):
 	if not entry1:
 		return 'entry not found', 404
 	entry2   = playlist.filter(Playlist.order==place-1).first()
-
-	h = entry1.song_id
-	entry1.song_id = entry2.song_id
-	entry2.song_id = h
+	entry1.order, entry2.order = entry2.order, entry1.order
 	session.commit()
 	return '', 204
 
@@ -492,16 +461,19 @@ def playlist_entry_delete(name,place):
 	if not player:
 		return 'player not found', 404
 
-	# Get playlist and entries
-	playlist =	session.query(Playlist).filter(and_(Playlist.playername==name,
-			Playlist.order>=place))
+	# Delete entry on place
+	entry = session.query(Playlist).filter(and_(Playlist.playername==name,
+			Playlist.order==place)).first()
+	if entry:
+		session.delete(entry)
+	else:
+		return '', 404
 
+	# New order
+	playlist =	session.query(Playlist).filter(and_(Playlist.playername==name,
+			Playlist.order>place))
 	for entry in playlist.order_by(Playlist.order):
-		hentry = playlist.filter(Playlist.order==entry.order+1).first()
-		if hentry:
-			entry.song_id = hentry.song_id
-		else:
-			session.delete(entry)
+		entry.order = entry.order-1
 	session.commit()
 	return '', 204
 
@@ -536,22 +508,12 @@ def playlist_entry_add(name,place):
 	playlist =	session.query(Playlist).filter(Playlist.playername==name)
 	size = playlist.count()
 	if place > size+1:
-		return 'place too big', 400
+		return 'place too big', 404
 
-	session.add(Playlist(order=playlist.count()+1,
-		playername=name))
-
-	# Get size of playlist (changed)
-	size = playlist.count()
-	# Shift entries of playlist
-	for entry in playlist.filter(Playlist.order>=place).order_by(desc(Playlist.order)):
-		if entry.order != place:
-			entry.song_id = playlist.filter(Playlist.order==entry.order-1)\
-					.first().song_id
-		else:
-			entry.song_id = id
+	for entry in playlist.filter(Playlist.order>=place):
+		entry.order = entry.order+1
+	session.add(Playlist(order=place, playername=name, song_id=id))
 	session.commit()
-
 	return '', 204
 
 
@@ -565,10 +527,12 @@ def current_playing_get(name):
 		return 'Do not exist', 404
 	current = session.query(Current).filter(Current.playername==name).first()
 	if current:
-		return json.dumps({'song_id':current.playlist.song_id,
-			'playlist_id':current.playlist_id})
+		entry = session.query(Playlist)\
+				.filter(Playlist.id == Current.playlist_id).first()
+		return json.dumps({'song_id':entry.song_id,
+			'playlist_id':entry.id})
 	else:
-		return None
+		return 'current not set', 404
 
 
 @app.route('/playlist/<name>/current', methods = ['POST'])
@@ -600,9 +564,9 @@ def current_playing_set(name):
 	if not entry:
 		return 'Playlist does not contain song', 400
 
-	if entry.current:
-		entry.current.playername  = name
-		entry.current.playlist_id = id
+	current = session.query(Current).filter(Current.playername==name).first()
+	if current:
+		current.playlist_id = id
 	else:
 		session.add(Current(playername=name, playlist_id=id))
 	session.commit()
