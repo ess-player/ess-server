@@ -45,7 +45,7 @@ class Album(Base):
 	id        = Column('id', Integer, autoincrement='ignore_fk',
 			primary_key=True)
 	name      = Column('name', String(255), nullable=False)
-	artist_id = Column('artist_id', None, ForeignKey('music_artist.id'))
+	artist_id = Column('artist_id', ForeignKey('music_artist.id'))
 
 	artist    = relationship("Artist", backref=backref('music_album'))
 
@@ -65,8 +65,8 @@ class Song(Base):
 	times_played = Column('times_played', Integer(unsigned=True))
 	uri          = Column('uri', String(2**16), nullable=False)
 	genre        = Column('genre', String(255))
-	artist_id    = Column('artist_id', None, ForeignKey('music_artist.id'))
-	album_id     = Column('album_id', None, ForeignKey('music_album.id'))
+	artist_id    = Column('artist_id', ForeignKey('music_artist.id'))
+	album_id     = Column('album_id', ForeignKey('music_album.id'))
 
 	artist       = relationship("Artist", backref=backref('music_song'))
 	album        = relationship("Album",  backref=backref('music_song'))
@@ -92,25 +92,22 @@ class Playlist(Base):
 
 	id          = Column('id', Integer(unsigned=True), primary_key=True,
 			autoincrement=True)
-	playername  = Column('playername', None, ForeignKey('player.playername'))
-	song_id     = Column('song_id', None, ForeignKey('music_song.id'), nullable=False)
+	playername  = Column('playername', ForeignKey('player.playername'))
+	order       = Column('order', Integer(unsigned=True))
+	song_id     = Column('song_id', ForeignKey('music_song.id'), nullable=False)
 	song        = relationship("Song",  backref=backref('playlist'))
-	next_id     = Column(Integer(unsigned=True), ForeignKey('playlist.id'), unique=True)
-	next        = relationship("Playlist", primaryjoin=next_id == id, uselist=False)
-	previous_id = Column(Integer(unsigned=True), ForeignKey('playlist.id'), unique=True)
-	previous    = relationship("Playlist", primaryjoin=previous_id == id, uselist=False)
 
 	def __repr__(self):
-		return '<(playername=%s, song_id=%i, next_id=%i, previous_id=%i)>' % \
-			(self.playername, self.song_id, self.next_id , self.previous_id)
+		return '<(playername=%s, order=%i, song_id=%i)>' % \
+			(self.playername, self.order, self.song_id)
 
 
 class Current(Base):
 	__tablename__ = 'current'
-	
-	playername  = Column('playername', None, ForeignKey('player.playername'),
+
+	playername  = Column('playername', ForeignKey('player.playername'),
 			primary_key=True)
-	playlist_id = Column('playlist_id', None, ForeignKey('playlist.id'),
+	playlist_id = Column('playlist_id', ForeignKey('playlist.id'),
 			nullable = False)
 	Playlist    = relationship("Playlist",
 					backref=backref('playlist'), uselist=True)
