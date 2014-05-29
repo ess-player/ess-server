@@ -83,8 +83,8 @@ class Player(Base):
 	description = Column('description', String(255))
 
 	def __repr__(self):
-		return '<Player(playername=%s, description="%s", playlist_id=%i)>' % \
-			(self.playername, self.description, self.playlist_id)
+		return '<Player(playername=%s, description=%s)>' % \
+			(self.playername, self.description)
 
 
 class Playlist(Base):

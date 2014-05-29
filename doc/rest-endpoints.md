@@ -9,7 +9,7 @@
 | X    | GET         | /playlist/[playername]/current      | Get current of player [playername]                                      | Output = JSON{"song_id":song_id, "playlist_id":playlist_id} |
 | X    | POST        | /playlist/[playername]/current      | Post current of player [playername]                                     | Input = JSON{"song_id":song_id, "playlist_id":playlist_id} |
 | X    | GET         | /playlist/[playername]              | Get songlist and current of [playername]                                | Output = {"current":{"song_id":song_id, "playlist_id":playlist_id}, "list":[{"song_id":song_id, "playlist_id":playlist_id}, ...]} |
-| X    | POST        | /playlist/[playername]              | Post songlist and current of [playername]                               | Output = {"current":{"song_id":song_id, "playlist_id":playlist_id},"list":[song_id, ..., song_id]} |
+| X    | POST        | /playlist/[playername]              | Post songlist of [playername]                                           | Output = {"list":[song_id, ..., song_id]} |
 | X    | DELETE      | /playlist/[playername]              | Delete playlist of [playername]                                         | - |
 |      | GET         | /song/[id]                          | Deliver Song with id [id]                                               | Output = Song as file |
 |      | GET         | /                                   | -                                                                       | - |
