@@ -1,15 +1,15 @@
 | Done | HTTP method | URL                                 | Description                                                             | Input/Output |
 |------|-------------|-------------------------------------|-------------------------------------------------------------------------|--------------|
 | X    | POST        | /player                             | Register a player                                                       | Input = JSON{"name":name, "description":description} |
-| X    | GET         | /player                             | Name and description of all players                                     | Output = JSON {"player":[{"current":current, "name":name, "description":description}, ...]} |
+| X    | GET         | /player                             | Name and description of all players                                     | Output = JSON {"player":[{"current":{"song_id":song_id, "playlist_id":playlist_id}, "name":name, "description":description}, ...]} |
 | X    | DELETE      | /player                             | Delete all players                                                      | - |
-| X    | GET         | /player/[playername]                | Name and description of [playername]                                    | Output = JSON{"current":current, "name":name, "description":description}               |
-| X    | GET         | /playlist                           | songlist and current of all playlists                                   | Output = JSON{playername:{"current":current, "list":[song_id, ..., song_id]},...} |
+| X    | GET         | /player/[playername]                | Name and description of [playername]                                    | Output = JSON{"current":{"song_id":song_id, "playlist_id":playlist_id}, "name":name, "description":description}               |
+| X    | GET         | /playlist                           | songlist and current of all playlists                                   | Output = JSON{playername:{"current":{"song_id":song_id, "playlist_id":playlist_id}, "list":[{"song_id":song_id, "playlist_id":playlist_id}...]},...} |
 | X    | DELETE      | /playlist                           | Delete all playlists                                                    | - |
-| X    | GET         | /playlist/[playername]/current      | Get current of player [playername]                                      | Output = JSON{"id":song_id} |
-| X    | POST        | /playlist/[playername]/current      | Post current of player [playername]                                     | Input = JSON{"id":song_id} |
-| X    | GET         | /playlist/[playername]              | Get songlist and current of [playername]                                | Output = {"current":current, "list":[song_id, ..., song_id]} |
-| X    | POST        | /playlist/[playername]              | Post songlist and current of [playername]                               | Output = {"current":current,"list":[song_id, ..., song_id]} |
+| X    | GET         | /playlist/[playername]/current      | Get current of player [playername]                                      | Output = JSON{"song_id":song_id, "playlist_id":playlist_id} |
+| X    | POST        | /playlist/[playername]/current      | Post current of player [playername]                                     | Input = JSON{"song_id":song_id, "playlist_id":playlist_id} |
+| X    | GET         | /playlist/[playername]              | Get songlist and current of [playername]                                | Output = {"current":{"song_id":song_id, "playlist_id":playlist_id}, "list":[{"song_id":song_id, "playlist_id":playlist_id}, ...]} |
+| X    | POST        | /playlist/[playername]              | Post songlist and current of [playername]                               | Output = {"current":{"song_id":song_id, "playlist_id":playlist_id},"list":[song_id, ..., song_id]} |
 | X    | DELETE      | /playlist/[playername]              | Delete playlist of [playername]                                         | - |
 |      | GET         | /song/[id]                          | Deliver Song with id [id]                                               | Output = Song as file |
 |      | GET         | /                                   | -                                                                       | - |
