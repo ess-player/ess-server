@@ -110,7 +110,7 @@ class Current(Base):
 	playlist_id = Column('playlist_id', ForeignKey('playlist.id'),
 			nullable = False)
 	playlist    = relationship("Playlist",
-					backref=backref('playlist'), uselist=True)
+					backref=backref('playlist'), uselist=False)
 
 	def __repr__(self):
 		return '<(playername=%s, playlist_id=%i)>' % \

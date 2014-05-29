@@ -193,8 +193,8 @@ def player_list_all():
 			playerlist.append({
 				'name'        : player.playername,
 				'description' : player.description,
-				'current'     : {'song_id':current.song.id,
-					'playlist_id':current.id}})
+				'current'     : {'song_id':current.playlist.song_id,
+					'playlist_id':current.playlist_id}})
 		else:
 			playerlist.append({
 				'name'        : player.playername,
@@ -218,8 +218,8 @@ def player_list(name):
 		return jsonify({
 				'name'        : player.playername,
 				'description' : player.description,
-				'current'     : {'song_id':current.song.id,
-					'playlist_id':current.id}})
+				'current'     : {'song_id':current.playlist.song_id,
+					'playlist_id':current.playlist_id}})
 	else:
 		return jsonify({
 				'name'        : player.playername,
@@ -265,7 +265,7 @@ def playlist_list_all():
 		current = session.query(Current).filter(Current.playername==player.playername).first()
 		if current:
 			curstr = {'song_id':current.playlist.song_id,
-					'playlist_id':current.playerlist_id}
+					'playlist_id':current.playlist_id}
 		else:
 			curstr = None
 
@@ -317,7 +317,7 @@ def playlist_list(name):
 	current = session.query(Current).filter(Current.playername==player.playername).first()
 	if current:
 		curstr = {'song_id':current.playlist.song_id,
-				'playlist_id':current.playerlist_id}
+				'playlist_id':current.playlist_id}
 	else:
 		curstr = None
 
@@ -527,10 +527,10 @@ def current_playing_get(name):
 		return 'Do not exist', 404
 	current = session.query(Current).filter(Current.playername==name).first()
 	if current:
-		entry = session.query(Playlist)\
-				.filter(Playlist.id == Current.playlist_id).first()
-		return json.dumps({'song_id':entry.song_id,
-			'playlist_id':entry.id})
+	#	entry = session.query(Playlist)\
+	#			.filter(Playlist.id == Current.playlist_id).first()
+		return json.dumps({'song_id':current.playlist.song_id,
+			'playlist_id':current.playlist_id})
 	else:
 		return 'current not set', 404
 
