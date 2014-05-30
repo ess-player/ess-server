@@ -41,7 +41,7 @@ var SearchHeader = React.createClass({
 
 var SearchUI = React.createClass({
 	handleSearch: function(keyword) {
-		var request = '{ "search" : "'+keyword+'" }';
+		var request = JSON.stringify({ search : keyword });
 		$.ajax({
 			type: "POST",
 			dataType: 'json',
