@@ -336,8 +336,8 @@ def playlist_list(name):
 			'current'     : curstr})
 
 
-@app.route('/playlist/<name>', methods = ['POST'])
-def playlist_post(name):
+@app.route('/playlist/<name>', methods = ['PUT'])
+def playlist_put(name):
 	'''Post a playerlist for the player *name*.
 	'''
 	session = get_session()
@@ -350,25 +350,28 @@ def playlist_post(name):
 	data = request.form.get('data') \
 			if request.content_type in _formdata \
 			else request.data
+
 	try:
 		data = json.loads(data)
-	except Exception as e:
-		return e.message, 400
+	except:
+		return 'Invalid data', 400
 
 	# Get list of song_ids.
-	list = data.get('list')
-	if not list:
-		return 'list is missing', 400
+	songs = data.get('list')
+	if not songs:
+		return 'List of songs is missing', 400
 
 	# Check if the playlist already exists
 	playlist = session.query(Playlist).filter(Playlist.playername==name)
 	if playlist.count():
-		return 'playlist exists', 400
+		# TODO: Delete without commit to roll back in case of an error in the new
+		# playlist.
+		playlist_delete(name)
 
 	# Create playlist
-	for index in range(0,len(list)):
+	for index in xrange(len(songs)):
 		session.add(Playlist(order=index+1, playername=name, song_id =
-			list[index]))
+			songs[index]))
 
 	print('>>> Create new playlist for %s' % name)
 	session.commit()
@@ -383,7 +386,7 @@ def playlist_delete(name):
 	# Get player
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'Do not exist', 404
+		return 'Player does not exist', 404
 
 	# Delete currents
 	for current in session.query(Current).filter(Current.playername==name):
