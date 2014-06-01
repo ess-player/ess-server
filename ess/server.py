@@ -18,6 +18,14 @@ app.config.from_object(__name__)
 
 _formdata = ['application/x-www-form-urlencoded', 'multipart/form-data']
 
+
+def get_expand():
+	try:
+		return int(request.args.get('expand', 0))
+	except:
+		return 0
+
+
 @app.route('/', methods = ['GET', 'POST'])
 def list ():
 	# Method POST
@@ -185,10 +193,7 @@ def player_list_all():
 	'''List all players.
 	'''
 	session = get_session()
-	try:
-		expand = int(request.args.get('expand', 0))
-	except:
-		return '', 400
+	expand  = get_expand()
 	playerlist = [p.serialize(expand) for p in session.query(Player)]
 	return  jsonify(player=playerlist)
 
@@ -198,14 +203,11 @@ def player_list(name):
 	'''List player *name*.
 	'''
 	session = get_session()
+	expand  = get_expand()
 
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
 		return 'Do not exist', 404
-	try:
-		expand = int(request.args.get('expand', 0))
-	except:
-		return '', 400
 	return jsonify(player.serialize(expand))
 
 
@@ -228,14 +230,9 @@ def player_delete(name):
 def playlist_list_all():
 	''' List playlists of all players
 	'''
-
-	try:
-		expand = int(request.args.get('expand', 0))
-	except:
-		return '', 400
-
 	result = {}
 
+	expand  = get_expand()
 	session = get_session()
 	playlist = session.query(Playlist).order_by(Playlist.order)
 
@@ -269,10 +266,7 @@ def playlist_delete_all():
 def playlist_list(name):
 	'''List playlist from player *name*.
 	'''
-	try:
-		expand = int(request.args.get('expand', 0))
-	except:
-		return '', 400
+	expand  = get_expand()
 	session = get_session()
 
 	# Get Player and Current
@@ -440,10 +434,7 @@ def current_playing_delete(name):
 @app.route('/playlist/<name>/current', methods = ['GET'])
 def current_playing_get(name):
 	'''Handle current from a player's playlist'''
-	try:
-		expand = int(request.args.get('expand', 0))
-	except:
-		return '', 400
+	expand  = get_expand()
 	session = get_session()
 	# Get player
 	player = session.query(Player).filter(Player.playername==name).first()
