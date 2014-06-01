@@ -10,7 +10,7 @@ from ess import config
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, create_engine
 from sqlalchemy.orm import sessionmaker, relationship, backref
-from sqlalchemy.schema import PrimaryKeyConstraint
+from sqlalchemy.schema import PrimaryKeyConstraint, ForeignKeyConstraint
 Base = declarative_base()
 
 # Init
@@ -75,43 +75,57 @@ class Song(Base):
 		return '<Song(id=%i, title="%s", artist_id=%i)>' % \
 			(self.id, self.title, self.artist_id)
 
+	def serialize(self, expand=0):
+		return {k:v for k,v in self.__dict__.items() if not k.startswith('_')}
+
 
 class Player(Base):
 	__tablename__ = 'player'
 
 	playername  = Column('playername', String(255), primary_key=True)
 	description = Column('description', String(255))
+	current_idx = Column('current', Integer(unsigned=True), default=None)
+
+	current     = relationship("Playlist", foreign_keys=[playername, current_idx])
+
+	__table_args__ = (
+			ForeignKeyConstraint(
+				[playername, current_idx],
+				['playlist.playername', 'playlist.order'],
+				use_alter=True,
+				name='fk_current_song'),
+			{})
 
 	def __repr__(self):
-		return '<Player(playername=%s, description=%s)>' % \
-			(self.playername, self.description)
+		return '<Player(playername=%s, description=%s, current_idx=%i)>' % \
+			(self.playername, self.description, self.current_idx)
+
+	def serialize(self, expand=0):
+		if expand:
+			return {'playername':self.playername, 'description':self.description,
+					'current_idx':self.current_idx, 'current':self.current.serialize(expand-1)}
+		return {'playername':self.playername, 'description':self.description,
+				'current_idx':self.current_idx}
 
 
 class Playlist(Base):
 	__tablename__ = 'playlist'
 
-	id          = Column('id', Integer(unsigned=True), primary_key=True,
-			autoincrement=True)
-	playername  = Column('playername', ForeignKey('player.playername'))
-	order       = Column('order', Integer(unsigned=True))
+	playername  = Column('playername', ForeignKey('player.playername'), primary_key=True)
+	order       = Column('order', Integer(unsigned=True), primary_key=True, autoincrement=False)
 	song_id     = Column('song_id', ForeignKey('music_song.id'), nullable=False)
+
 	song        = relationship("Song",  backref=backref('playlist'))
+	player      = relationship("Player", foreign_keys=[playername])
 
 	def __repr__(self):
 		return '<(playername=%s, order=%i, song_id=%i)>' % \
 			(self.playername, self.order, self.song_id)
 
-
-class Current(Base):
-	__tablename__ = 'current'
-
-	playername  = Column('playername', ForeignKey('player.playername'),
-			primary_key=True)
-	playlist_id = Column('playlist_id', ForeignKey('playlist.id'),
-			nullable = False)
-	playlist    = relationship("Playlist",
-					backref=backref('playlist'), uselist=False)
-
-	def __repr__(self):
-		return '<(playername=%s, playlist_id=%i)>' % \
-				(self.playername, self.playlist_id)
+	def serialize(self, expand=0):
+		if expand:
+			return {'playername':self.playername,
+					'player':self.player.serialize(expand-1), 'order':self.order,
+					'song_id':self.song_id, 'song':self.song.serialize(expand-1)}
+		return {'playername':self.playername, 'order':self.order,
+				'song_id':self.song_id}

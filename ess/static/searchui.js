@@ -7,6 +7,7 @@ var Result = React.createClass({
 				<td>{this.props.artist}</td>
 				<td>{this.props.album}</td>
 				<td>{this.props.title}</td>
+				<td><a href="#" title="Add to playlist">⏩</a></td>
 			</tr>
 			);
 	}
