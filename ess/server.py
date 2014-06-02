@@ -340,55 +340,29 @@ def playlist_delete(name):
 
 
 @app.route('/playlist/<name>/<int:place>/up')
-def playlist_entry_up(name,place):
-	'''Change playlistentry from playlist playlist on place place with
-	playlistentry on place place+1'''
-
-	session = get_session()
-	# Get player
-	player = session.query(Player).filter(Player.playername==name).first()
-	if not player:
-		return 'player not found', 404
-
-	# Get playlist and entries
-	playlist = session.query(Playlist).filter(Playlist.playername==name)
-	if not playlist.count():
-		return 'playlist not found', 404
-
-	entry1 = playlist.filter(Playlist.order==place).first()
-	if not entry1:
-		return 'entry not found', 404
-	entry2 = playlist.filter(Playlist.order==place+1).first()
-	if not entry2:
-		return '', 204
-	entry1.order, entry2.order = entry2.order, entry1.order
-	session.commit()
-	return '', 204
-
-
 @app.route('/playlist/<name>/<int:place>/down')
 def playlist_entry_down(name,place):
 	'''Change playlistentry from playlist playlist on place place with
 	playlistentry on place place-1'''
 
-	if place == 1:
-		return '204'
-
 	session = get_session()
 	# Get player
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
 		return 'player not found', 404
 
+	direction = 1 if request.path.endswith('/down') else -1
+
+	if player.current_idx == place:
+		player.current_idx = player.current_idx + direction
+
 	# Get playlist and entries
 	playlist = session.query(Playlist).filter(Playlist.playername==name)
-	if not playlist.count():
-		return 'playlist not found', 404
 	entry1   = playlist.filter(Playlist.order==place).first()
-	if not entry1:
+	entry2   = playlist.filter(Playlist.order==place + direction).first()
+	if not (entry1 and entry1):
 		return 'entry not found', 404
-	entry2   = playlist.filter(Playlist.order==place-1).first()
-	entry1.order, entry2.order = entry2.order, entry1.order
+	entry1.song_id, entry2.song_id = entry2.song_id, entry1.song_id
 	session.commit()
 	return '', 204
 
