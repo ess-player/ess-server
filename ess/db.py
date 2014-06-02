@@ -48,9 +48,9 @@ class Album(Base):
 	id        = Column('id', Integer, autoincrement='ignore_fk',
 			primary_key=True)
 	name      = Column('name', String(255), nullable=False)
-	artist_id = Column('artist_id', ForeignKey('music_artist.id'))
+	artist_id = Column('artist_id', ForeignKey('artist.id'))
 
-	artist    = relationship("Artist", backref=backref('music_album'))
+	artist    = relationship("Artist", backref=backref('album'))
 
 	def __repr__(self):
 		return '<Album(id=%i, name="%s", artist_id=%i)>' % \
@@ -76,14 +76,14 @@ class Media(Base):
 	path         = Column('path', String(2**16), nullable=False)
 	genre        = Column('genre', String(255))
 	duration     = Column('duration', Integer(unsigned=True), nullable=True)
-	artist_id    = Column('artist_id', ForeignKey('music_artist.id'))
-	album_id     = Column('album_id', ForeignKey('music_album.id'))
+	artist_id    = Column('artist_id', ForeignKey('artist.id'))
+	album_id     = Column('album_id', ForeignKey('album.id'))
 
-	artist       = relationship("Artist", backref=backref('music_song'))
-	album        = relationship("Album",  backref=backref('music_song'))
+	artist       = relationship("Artist", backref=backref('media'))
+	album        = relationship("Album",  backref=backref('media'))
 
 	def __repr__(self):
-		return '<Song(id=%i, title="%s", artist_id=%i)>' % \
+		return '<Media(id=%i, title="%s", artist_id=%i)>' % \
 			(self.id, self.title, self.artist_id)
 
 
@@ -119,7 +119,7 @@ class Player(Base):
 				[playername, current_idx],
 				['playlist_entry.playername', 'playlist_entry.order'],
 				use_alter=True,
-				name='fk_current_song'),
+				name='fk_current_media'),
 			{})
 
 	def __repr__(self):

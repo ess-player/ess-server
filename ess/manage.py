@@ -6,24 +6,21 @@ import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
 
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Table, Column, Integer, String, MetaData, ForeignKey, create_engine
-from sqlalchemy.orm import sessionmaker, relationship, backref
 import subprocess, json
 import os
 import config
-from ess.db import get_session, Song, Artist, Album
+from ess.db import get_session, Media, Artist, Album
 
 session = get_session()
 
-def insert_song(uri):
+def insert_media(path):
 	# Use ffprobe to get ID3-Tags
 	process = subprocess.Popen( [ 'ffprobe', '-show_format', '-show_streams',
-		'-of', 'json', uri ], stdout=subprocess.PIPE,
+		'-of', 'json', path ], stdout=subprocess.PIPE,
 		stderr=subprocess.PIPE )
 	[stdout, stderr] = process.communicate()
 	if process.returncode:
-		print ('>>> Warning: Could not read %s' % uri)
+		print ('>>> Warning: Could not read %s' % path)
 		return 1
 	try:
 		data = json.loads(stdout)
@@ -37,13 +34,13 @@ def insert_song(uri):
 				stdout = re.sub(r'[^\w\s\d-.,;:!"§$]&"\'\{\}\[\]]', '_', stdout)
 				data = json.loads(stdout)
 			except:
-				print 'Could not import %s' % uri
+				print 'Could not import %s' % path
 				return
 
 	tags = data['format'].get('tags') or {}
 
 	if	data['format']['format_name'] not in config.FORMATS:
-		print ('>>> Warning: Format not supported from %s' % uri)
+		print ('>>> Warning: Format not supported from %s' % path)
 		return 1
 
 	# Try to get the artist from db
@@ -69,20 +66,22 @@ def insert_song(uri):
 			album = Album(name=tags['album'], artist=artist)
 			session.add(album)
 
-	song = Song(
-			title=tags.get('title') or uri.rsplit('/',1)[-1],
+	media = Media(
+			title=tags.get('title') or path.rsplit('/',1)[-1],
 			date=tags.get('date'),
 			tracknumber=tags.get('track'),
-			uri=uri,
+			path=path,
+			genre=tags.get('genre'),
+			duration=int(float(tags['duration'])) if tags.get('duration') else None,
 			artist=artist,
 			album=album
 		)
-	session.add(song)
-	print('>>> Read %s' % uri)
-	return song
+	session.add(media)
+	print('>>> Read %s' % path)
+	return media
 
-def insert_files(uri):
-	for folder, subs, files in os.walk(uri):
+def insert_files(path):
+	for folder, subs, files in os.walk(path):
 		for filename in files:
-			insert_song(os.path.join(folder, filename))
+			insert_media(os.path.join(folder, filename))
 	session.commit()
