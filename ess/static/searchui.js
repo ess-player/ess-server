@@ -15,8 +15,9 @@ var Result = React.createClass({
 
 var SearchResult = React.createClass({
 	render: function() {
-		var resultNodes = this.props.songs.map(function (song, index) {
-			return <Result key={index} artist={song.artist} album={song.album} title={song.title} />
+		var resultNodes = this.props.media.map(function (media, index) {
+			return <Result key={index} artist={media.artist.name}
+			album={media.album.name} title={media.title} />
 		});
 		return <table className="body">{resultNodes}</table>;
 	}
@@ -55,13 +56,13 @@ var SearchUI = React.createClass({
 		});
 	 },
 	 getInitialState: function() {
-		 return {songs: []};
+		 return {media: []};
 	 },
 	 render: function() {
 		 return (
 			 <div>
 				 <SearchHeader onSearch={this.handleSearch} />
-				 <SearchResult songs={this.state.songs} />
+				 <SearchResult media={this.state.media} />
 			 </div>
 		 );
 	 }

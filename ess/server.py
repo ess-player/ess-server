@@ -75,19 +75,7 @@ def media_search():
 									Artist.name.like(hs)))
 
 	entries = entries.order_by(Artist.name)
-	media = []
-	for entry in entries:
-		if entry.artist:
-			artist_name = entry.artist.name
-		else:
-			artist_name = None
-		if entry.album:
-			album_name = entry.album.name
-		else:
-			album_name = None
-		media.append(media.serialize(1))
-
-	return jsonify({'media': media})
+	return jsonify({'media': [e.serialize(1) for e in entries]})
 
 
 @app.route('/media/<int:media_id>')
