@@ -8,7 +8,7 @@ sys.setdefaultencoding('utf8')
 
 # Imports
 from flask import Flask, request, redirect, url_for, render_template, jsonify, stream_with_context, Response
-from sqlalchemy import or_, and_, desc
+from sqlalchemy import or_, and_, desc, func
 import json
 from ess.db import get_session, Media, Artist, Album, Player, PlaylistEntry
 import os.path
@@ -181,7 +181,7 @@ def player_delete(name):
 	if not player:
 		return 'Do not exist', 404
 
-	session.query(Playlist).filter(Playlist.playername==name).delete()
+	session.query(PlaylistEntry).filter(PlaylistEntry.playername==name).delete()
 	session.delete(player)
 	session.commit()
 	return '', 204
@@ -283,6 +283,34 @@ def playlist_put(name):
 	return '', 201
 
 
+@app.route('/playlist/<name>', methods = ['POST'])
+def playlist_entry_add(name):
+	'''Post a playerlist for the player *name*.
+	'''
+	data = request.form.get('data') \
+			if request.content_type in _formdata \
+			else request.data
+
+	try:
+		data = json.loads(data)
+	except:
+		return 'Invalid data', 400
+
+	print data
+	session = get_session()
+	try:
+		(maximum_order,) = session.query(func.max(PlaylistEntry.order))\
+				.filter(PlaylistEntry.playername==name).first()
+		print maximum_order
+		session.add(PlaylistEntry(order=maximum_order+1, playername=name,
+			media_id=data['media']))
+	except:
+		return '', 400
+
+	session.commit()
+	return '', 201
+
+
 @app.route('/playlist/<name>', methods = ['DELETE'])
 def playlist_delete(name):
 	'''Delete playlist.
@@ -322,7 +350,7 @@ def playlist_entry_down(name,place):
 		return 'entry not found', 404
 	if player.current_idx == place:
 		player.current_idx = player.current_idx + direction
-	entry1.song_id, entry2.song_id = entry2.song_id, entry1.song_id
+	entry1.media_id, entry2.media_id = entry2.media_id, entry1.media_id
 	session.commit()
 	return '', 204
 
@@ -332,24 +360,18 @@ def playlist_entry_delete(name,place):
 	'''Delete playlistentry from playlist on place place'''
 
 	session = get_session()
-	# Get player
-	player = session.query(Player).filter(Player.playername==name).first()
-	if not player:
-		return 'player not found', 404
-
-	# Delete entry on place
-	entry = session.query(PlaylistEntry).filter(and_(PlaylistEntry.playername==name,
-			PlaylistEntry.order==place)).first()
-	if entry:
-		session.delete(entry)
-	else:
-		return '', 404
+	player = session.query(Player).filter_by(playername=name).first()
+	if player.current_idx == place:
+		player.current_idx = None
+	session.query(PlaylistEntry).filter(and_(PlaylistEntry.playername==name,
+			PlaylistEntry.order==place)).delete()
 
 	# New order
-	playlist =	session.query(PlaylistEntry).filter(and_(PlaylistEntry.playername==name,
-			PlaylistEntry.order>place))
-	for entry in playlist.order_by(PlaylistEntry.order):
-		entry.order = entry.order-1
+	if player.current_idx > place:
+		player.current_idx = player.current_idx - 1
+	for e in	session.query(PlaylistEntry).filter(and_(PlaylistEntry.playername==name,
+		PlaylistEntry.order>place)).order_by(PlaylistEntry.order):
+		e.order = e.order-1
 	session.commit()
 	return '', 204
 
@@ -394,7 +416,7 @@ def current_playing_set(name):
 
 	current = data.get('current')
 	if current is None:
-		return 'You have to specify a song', 400
+		return 'You have to specify a media', 400
 
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()

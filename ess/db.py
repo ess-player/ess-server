@@ -151,8 +151,7 @@ class PlaylistEntry(Base):
 
 
 	def serialize(self, expand=0):
-		if expand:
-			return {
-					'player' : self.player.serialize(expand-1) if expand else self.playername,
-					'order'  : self.order,
-					'media'  : self.media.serialize(expand-1) if expand else self.media_id}
+		return {
+				'player' : self.player.serialize(expand-1) if expand else self.playername,
+				'order'  : self.order,
+				'media'  : self.media.serialize(expand-1) if expand else self.media_id}
