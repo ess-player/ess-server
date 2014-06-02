@@ -353,15 +353,14 @@ def playlist_entry_down(name,place):
 
 	direction = 1 if request.path.endswith('/down') else -1
 
-	if player.current_idx == place:
-		player.current_idx = player.current_idx + direction
-
 	# Get playlist and entries
 	playlist = session.query(Playlist).filter(Playlist.playername==name)
 	entry1   = playlist.filter(Playlist.order==place).first()
 	entry2   = playlist.filter(Playlist.order==place + direction).first()
-	if not (entry1 and entry1):
+	if not (entry1 and entry2):
 		return 'entry not found', 404
+	if player.current_idx == place:
+		player.current_idx = player.current_idx + direction
 	entry1.song_id, entry2.song_id = entry2.song_id, entry1.song_id
 	session.commit()
 	return '', 204
