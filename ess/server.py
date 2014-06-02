@@ -10,7 +10,7 @@ sys.setdefaultencoding('utf8')
 from flask import Flask, request, redirect, url_for, render_template, jsonify, stream_with_context, Response
 from sqlalchemy import or_, and_, desc
 import json
-from ess.db import get_session, Song, Artist, Album, Player, Playlist
+from ess.db import get_session, Media, Artist, Album, Player, PlaylistEntry
 import os.path
 # Create aplication
 app = Flask(__name__)
@@ -26,45 +26,15 @@ def get_expand():
 		return 0
 
 
-@app.route('/', methods = ['GET', 'POST'])
-def list ():
-	# Method POST
-	if request.method == 'POST':
-		searchword = request.form['search']
-
-		# Redirect to list with searchword
-		if searchword:
-			return redirect('%s/?s=%s' % (url_for('list'), request.form['search'] ))
-
-		# Searching with an empty string redirect to list
-		return redirect(url_for('list'))
-
-	# Method GET
-	# Get searchword from URL
-	s = request.args.get('s', '')
-	if s:
-		hs = '%' + s + '%'
-		entries = get_session().query(Song)\
-				.outerjoin(Album)\
-				.outerjoin(Artist)\
-				.filter(or_(Song.title.like(hs),
-							Song.genre.like(hs),
-							Song.date.like(hs),
-							Album.name.like(hs),
-							Artist.name.like(hs)))\
-				.order_by(Song.title)\
-				.all()
-
-	else:
-		entries = get_session().query(Song).order_by(Song.title).all()
-
-	# Return the list of data
-	return render_template('database.html', entries=entries, searchword=s)
+@app.route('/')
+def render():
+	''' Render sites'''
+	return render_template('database.html')
 
 
 @app.route('/search', methods = ['POST'])
-def song_search():
-	''' Search for songs '''
+def media_search():
+	''' Search for media '''
 	data = request.form.get('data') \
 			if request.content_type in _formdata \
 			else request.data
@@ -75,37 +45,37 @@ def song_search():
 
 	search = data.get('search')
 	if not search:
-		entries = get_session().query(Song)\
+		entries = get_session().query(Media)\
 					.outerjoin(Album)\
 					.outerjoin(Artist)
 	else:
 		searchlist = search.split()
 		if not searchlist:
-			entries = get_session().query(Song)\
+			entries = get_session().query(Media)\
 					.outerjoin(Album)\
 					.outerjoin(Artist)
 		else:
 			hs = '%' + searchlist[0]  + '%'
-			entries = get_session().query(Song)\
+			entries = get_session().query(Media)\
 						.outerjoin(Album)\
 						.outerjoin(Artist)\
-						.filter(or_(Song.title.like(hs),
-									Song.genre.like(hs),
-									Song.date.like(hs),
+						.filter(or_(Media.title.like(hs),
+									Media.genre.like(hs),
+									Media.date.like(hs),
 									Album.name.like(hs),
 									Artist.name.like(hs)))
 
 			for s in searchlist[1:]:
 				hs = '%' + s + '%'
 				entries  = entries\
-						.filter(or_(Song.title.like(hs),
-									Song.genre.like(hs),
-									Song.date.like(hs),
+						.filter(or_(Media.title.like(hs),
+									Media.genre.like(hs),
+									Media.date.like(hs),
 									Album.name.like(hs),
 									Artist.name.like(hs)))
 
 	entries = entries.order_by(Artist.name)
-	songs = []
+	media = []
 	for entry in entries:
 		if entry.artist:
 			artist_name = entry.artist.name
@@ -115,38 +85,29 @@ def song_search():
 			album_name = entry.album.name
 		else:
 			album_name = None
-		songs.append({
-			'id'           : entry.id,
-			'title'        : entry.title,
-			'artist'       : artist_name,
-			'album'        : album_name,
-			'date'         : entry.date,
-			'genre'        : entry.genre,
-			'tracknumber'  : entry.tracknumber,
-			'times_played' : entry.times_played
-			})
+		media.append(media.serialize(1))
 
-	return jsonify({'songs': songs})
+	return jsonify({'media': media})
 
 
-@app.route('/song/<int:song_id>')
-def deliver_song(song_id):
-	''' Deliver Songs to player '''
+@app.route('/media/<int:media_id>')
+def deliver_media(media_id):
+	''' Deliver media to player '''
 
-	song = get_session().query(Song).filter(Song.id ==
-			song_id).first()
+	media = get_session().query(Media).filter(Media.id ==
+			Media_id).first()
 
-	if not song:
+	if not media:
 		return '', 404
 
 	def generate():
-		with open(song.uri,'rb') as f:
+		with open(media.path,'rb') as f:
 			part = f.read(1024)
 			while part:
 				yield part
 				part = f.read(128*1024)
  	response = Response(stream_with_context(generate()), mimetype='application/octet-stream')
-	response.headers['content-length'] = os.path.getsize(song.uri)
+	response.headers['content-length'] = os.path.getsize(media.path)
 	return response
 
 
@@ -234,9 +195,9 @@ def playlist_list_all():
 
 	expand  = get_expand()
 	session = get_session()
-	playlist = session.query(Playlist).order_by(Playlist.order)
+	playlist = session.query(PlaylistEntry).order_by(PlaylistEntry.order)
 
-	# Collect songs of playlist
+	# Collect Media of playlist
 	for entry in playlist:
 		if not result.get(entry.playername):
 			result[entry.playername] = []
@@ -256,7 +217,7 @@ def playlist_delete_all():
 		player.current_idx = None
 
 	# Delete playlists
-	session.query(Playlist).delete()
+	session.query(PlaylistEntry).delete()
 
 	session.commit()
 	return '', 204
@@ -274,12 +235,12 @@ def playlist_list(name):
 	if not player:
 		return 'Do not exist', 404
 
-	# Get Songs
-	playlist = session.query(Playlist)\
-			.filter(Playlist.playername==name)\
-			.order_by(Playlist.order)
+	# Get media
+	playlist = session.query(PlaylistEntry)\
+			.filter(PlaylistEntry.playername==name)\
+			.order_by(PlaylistEntry.order)
 
-	# Collect songs of playlist
+	# Collect media of playlist
 	items = [e.serialize(expand) for e in playlist]
 
 	return jsonify({name:items})
@@ -305,17 +266,17 @@ def playlist_put(name):
 	except:
 		return 'Invalid data', 400
 
-	# Get list of song_ids.
-	songs = data.get('list')
-	if not songs:
-		return 'List of songs is missing', 400
+	# Get list of media_ids.
+	media = data.get('list')
+	if not media:
+		return 'List of media is missing', 400
 
 	# Delete old entries
-	playlist = session.query(Playlist).filter(Playlist.playername==name).delete()
+	playlist = session.query(PlaylistEntry).filter(PlaylistEntry.playername==name).delete()
 
 	# Create playlist
-	for i in xrange(len(songs)):
-		session.add(Playlist(order=i, playername=name, song_id=songs[i]))
+	for i in xrange(len(media)):
+		session.add(PlaylistEntry(order=i, playername=name, media_id=media[i]))
 
 	print('>>> Create new playlist for %s' % name)
 	session.commit()
@@ -333,7 +294,7 @@ def playlist_delete(name):
 		return 'player not found', 404
 	player.current_idx = None
 	# Delete playlists
-	session.query(Playlist).filter(Playlist.playername==name).delete()
+	session.query(PlaylistEntry).filter(PlaylistEntry.playername==name).delete()
 	session.commit()
 
 	return '', 204
@@ -354,9 +315,9 @@ def playlist_entry_down(name,place):
 	direction = 1 if request.path.endswith('/down') else -1
 
 	# Get playlist and entries
-	playlist = session.query(Playlist).filter(Playlist.playername==name)
-	entry1   = playlist.filter(Playlist.order==place).first()
-	entry2   = playlist.filter(Playlist.order==place + direction).first()
+	playlist = session.query(PlaylistEntry).filter(PlaylistEntry.playername==name)
+	entry1   = playlist.filter(PlaylistEntry.order==place).first()
+	entry2   = playlist.filter(PlaylistEntry.order==place + direction).first()
 	if not (entry1 and entry2):
 		return 'entry not found', 404
 	if player.current_idx == place:
@@ -377,17 +338,17 @@ def playlist_entry_delete(name,place):
 		return 'player not found', 404
 
 	# Delete entry on place
-	entry = session.query(Playlist).filter(and_(Playlist.playername==name,
-			Playlist.order==place)).first()
+	entry = session.query(PlaylistEntry).filter(and_(PlaylistEntry.playername==name,
+			PlaylistEntry.order==place)).first()
 	if entry:
 		session.delete(entry)
 	else:
 		return '', 404
 
 	# New order
-	playlist =	session.query(Playlist).filter(and_(Playlist.playername==name,
-			Playlist.order>place))
-	for entry in playlist.order_by(Playlist.order):
+	playlist =	session.query(PlaylistEntry).filter(and_(PlaylistEntry.playername==name,
+			PlaylistEntry.order>place))
+	for entry in playlist.order_by(PlaylistEntry.order):
 		entry.order = entry.order-1
 	session.commit()
 	return '', 204
