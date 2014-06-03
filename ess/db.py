@@ -1,5 +1,12 @@
-#!/bin/env python
 # -*- coding: utf-8 -*-
+'''
+	ess.db
+	~~~~~~
+
+	Database specification for the ess player project.
+
+	:license: FreeBSD, see license file for more details.
+'''
 
 # Set default encoding to UTF-8
 import sys
@@ -13,14 +20,21 @@ from sqlalchemy.orm import sessionmaker, relationship, backref
 from sqlalchemy.schema import ForeignKeyConstraint
 Base = declarative_base()
 
-# Init
 def init():
+	'''Initialize connection to database. Additionally the basic database
+	structure will be created if nonexistent.
+	'''
 	global engine
 	engine = create_engine(config.DATABASE)
 	Base.metadata.create_all(engine)
 
 
 def get_session():
+	'''Get a session for database communication. If necessary a new connection
+	to the database will be established.
+
+	:return:  Database session
+	'''
 	if not 'engine' in globals():
 		init()
 	Session = sessionmaker(bind=engine)
@@ -29,20 +43,37 @@ def get_session():
 
 # Database Schema Definition
 class Artist(Base):
+	'''Database definition of an artist.
+	'''
+
 	__tablename__ = 'artist'
 
+	'''Unique identifier of an artist'''
 	id   = Column('id', Integer(unsigned=True), autoincrement='ignore_fk',
 			primary_key=True)
+	'''Name of an artist'''
 	name = Column('name', String(255), nullable=False)
 
+
 	def __repr__(self):
+		'''Return a string representation of an artist object.
+
+		:return: String representation of object.
+		'''
 		return '<Artist(id=%i, name="%s")>' % (self.id, self.name)
 
 	def serialize(self, expand=0):
+		'''Serialize this object as dictionary usable for conversion to JSON.
+
+		:param expand: Defines if sub objects shall be serialized as well.
+		:return: Dictionary representing this object.
+		'''
 		return {'id':self.id, 'name':self.name}
 
 
 class Album(Base):
+	'''Album bla...
+	'''
 	__tablename__ = 'album'
 
 	id        = Column('id', Integer, autoincrement='ignore_fk',
