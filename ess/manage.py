@@ -77,7 +77,6 @@ def insert_media(path):
 			album=album
 		)
 	session.add(media)
-	print('>>> Read %s' % path)
 	return media
 
 def insert_files(path):

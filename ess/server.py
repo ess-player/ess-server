@@ -236,7 +236,7 @@ def playlist_list(name):
 
 @app.route('/playlist/<name>', methods = ['PUT'])
 def playlist_put(name):
-	'''Post a playerlist for the player *name*.
+	'''Post a playlist for the player *name*.
 	'''
 	session = get_session()
 
@@ -266,7 +266,6 @@ def playlist_put(name):
 	for i in xrange(len(media)):
 		session.add(PlaylistEntry(order=i, playername=name, media_id=media[i]))
 
-	print('>>> Create new playlist for %s' % name)
 	session.commit()
 	return '', 201
 
@@ -384,7 +383,7 @@ def current_playing_get(name):
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
 		return 'Do not exist', 404
-	return jsonify({'current':player.current.serialize(expand)})
+	return jsonify({'current':player.current.serialize(expand) if player.current else None})
 
 
 @app.route('/playlist/<name>/current', methods = ['PUT'])
