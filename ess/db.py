@@ -72,7 +72,7 @@ class Media(Base):
 	title        = Column('title', String(255), nullable=False)
 	date         = Column('date', String(255))
 	tracknumber  = Column('tracknumber', Integer(unsigned=True))
-	times_played = Column('times_played', Integer(unsigned=True))
+	times_played = Column('times_played', Integer(unsigned=True), default=0)
 	path         = Column('path', String(2**16), nullable=False)
 	genre        = Column('genre', String(255))
 	duration     = Column('duration', Integer(unsigned=True), nullable=True)

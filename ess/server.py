@@ -416,3 +416,22 @@ def current_playing_set(name):
 	except:
 		return 'Invalid data', 400
 	return '', 201
+
+@app.route('/playlist/<name>/current/done', methods = ['GET'])
+def current_done(name):
+	expand  = get_expand()
+	session = get_session()
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return 'Do not exist', 404
+	if not player.current:
+		return 'Current was not set', 400
+	player.current.media.times_played = + 1
+	if session.query(PlaylistEntry).filter(PlaylistEntry.playername==name,
+			PlaylistEntry.order==player.current_idx + 1).first():
+		player.current_idx += 1
+	else:
+		player.current_idx = None
+	session.commit()
+	return '', 200
+
