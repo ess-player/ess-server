@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-	ess-player
-	~~~~~~~~~~
+	ess
+	~~~
 
 	This is the ess-player.
 

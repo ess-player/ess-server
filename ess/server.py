@@ -1,5 +1,12 @@
-#!/bin/env python
 # -*- coding: utf-8 -*-
+'''
+	ess.server
+	~~~~~~~~~~
+
+	This is the ess-server.
+
+	:license: FreeBSD, see license file for more details.
+'''
 
 # Set default encoding to UTF-8
 import sys
@@ -34,7 +41,63 @@ def render():
 
 @app.route('/search', methods = ['POST'])
 def media_search():
-	''' Search for media '''
+	'''Full text search for media files.
+	
+	This method exposes an easy to use method for searching through the media
+	library. It should be convenient to use for UIs wanting to have a general
+	search interface.
+
+	HTTP return codes:
+	
+		====  =====================  ======================
+		Code  Status                 Meaning
+		====  =====================  ======================
+		200   OK                     Returned search result
+		400   Bad Request            Review your request
+		500   Internal Server Error  Please report this
+		====  =====================  ======================
+	
+	cURL command to search for term “pathetic”::
+
+		curl -f --request POST 'http://localhost:5001/search' \\
+				-H 'Content-Type: application/json' --data '{"search":"pathetic"}'
+
+	Search result::
+
+		{
+		  "media": [
+			 {
+				"album": {
+				  "artist": 1, 
+				  "id": 1, 
+				  "name": "Lightning"
+				}, 
+				"artist": {
+				  "id": 1, 
+				  "name": "Tamara Laurel"
+				}, 
+				"date": "2014", 
+				"duration": null, 
+				"genre": "(255)", 
+				"path": "/home/lars/music/sorted/Tamara Laurel - Lightning/05 - Tamara Laurel - Pathetic.mp3", 
+				"times_played": null, 
+				"title": "Pathetic", 
+				"tracknumber": 5
+			 }
+		  ]
+		}
+
+	Sending the data:
+
+		The data have to be JSON encoded and should fill the whole request body.
+		The content type of the request should be “application/json”. If
+		necessary, the content type can also be “multipart/form-data” or
+		“application/x-www-form-urlencoded” with the JSON data in the field
+		called “data”. However, we very much like to discourage you from using
+		the later method. While it should work in theory we are only using and
+		testing the first method.
+
+	'''
 	data = request.form.get('data') \
 			if request.content_type in _formdata \
 			else request.data
@@ -102,9 +165,25 @@ def deliver_media(media_id):
 @app.route('/player', methods = ['POST'])
 def player_register():
 	'''Register a player. The data have to be JSON encoded.
-	Example::
+
+	Example data to register a player “player01”::
 
 		{"name":"player01", "description":"The first player"}
+
+	cURL commend to register a player player01::
+
+		curl -i --request POST -H 'Content-Type: application/json' \\
+				--data '{"name":"player01"}'  "http://127.0.0.1:5001/player"
+
+	Sending the data:
+
+		The data have to be JSON encoded and should fill the whole request body.
+		The content type of the request should be “application/json”. If
+		necessary, the content type can also be “multipart/form-data” or
+		“application/x-www-form-urlencoded” with the JSON data in the field
+		called “data”. However, we very much like to discourage you from using
+		the later method. While it should work in theory we are only using and
+		testing the first method.
 
 	'''
 	data = request.form.get('data') \
