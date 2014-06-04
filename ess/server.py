@@ -36,7 +36,7 @@ def get_expand():
 @app.route('/')
 def render():
 	''' Render sites'''
-	return render_template('database.html')
+	return render_template('layout.html')
 
 
 @app.route('/search', methods = ['POST'])

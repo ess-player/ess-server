@@ -10,6 +10,14 @@
 
 	</head>
 	<body>
-	{% block body %}{% endblock %}
+		<div class=side id=searchui>
+		</div><div class=side>
+			<div class=header>
+				bla
+			</div>
+			<div class=body>
+			</div>
+		</div>
+		<script type="text/jsx" src="{{ url_for('static', filename='searchui.js') }}"></script>
 	</body>
 </html>
