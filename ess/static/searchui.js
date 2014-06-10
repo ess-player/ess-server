@@ -15,6 +15,9 @@ var Result = React.createClass({
 
 var SearchResult = React.createClass({
 	render: function() {
+		if (this.props.media == undefined) {
+			return <span />;
+		}
 		var resultNodes = this.props.media.map(function (media, index) {
 			return <Result key={index} artist={media.artist.name}
 			album={media.album.name} title={media.title} />
