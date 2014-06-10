@@ -4,9 +4,10 @@ var Entry = React.createClass({
 	render: function() {
 		return (
 			<tr>
-				<td>{this.props.artist}</td>
-				<td>{this.props.album}</td>
-				<td>{this.props.title}</td>
+				<td>{this.props.entry.order}</td>
+				<td>{this.props.entry.media.artist.name}</td>
+				<td>{this.props.entry.media.album.name}</td>
+				<td>{this.props.entry.media.title}</td>
 			</tr>
 			);
 	}
@@ -14,9 +15,11 @@ var Entry = React.createClass({
 
 var Playlist = React.createClass({
 	render: function() {
-		var resultNodes = this.props.media.map(function (media, index) {
-			return <Entry key={index} artist={media.artist.name}
-			album={media.album.name} title={media.title} />
+		if (this.props.playlist == undefined) {
+			return <span />;
+		}
+		var resultNodes = this.props.playlist.map(function (entry, index) {
+			return <Entry key={index} entry={entry} />
 		});
 		return <table className="body">{resultNodes}</table>;
 	}
@@ -31,7 +34,7 @@ var PlaylistHeader = React.createClass({
 	render: function() {
 		return (
 			<div className="header search">
-				<form className="searchForm" onSubmit={this.handlePlaylist}>
+				<form className="playerSelectForm" onSubmit={this.handlePlaylist}>
 					<input type="text" placeholder="Playername…" ref="keyword" />
 					<input type="image" src="/static/icons/iconmonstr-magnifier-icon-48.png" alt="Submit" />
 				</form>
@@ -45,22 +48,22 @@ var PlaylistUI = React.createClass({
 		$.ajax({
 			type: "GET",
 			dataType: 'json',
-			url: '/playlist/' + playername + '?expand=1',
+			url: '/playlist/' + playername + '?expand=2',
 			success: function( result ) {
 				playlist = result[playername];
-				this.setState(playlist);
+				this.setState({playlist:playlist});
 			}.bind(this)
 		});
 	 },
 	 getInitialState: function() {
-		 handlePlaylist('player01');
-		 return [];
+		 this.handlePlaylist('player01');
+		 return {playlist:[]};
 	 },
 	 render: function() {
 		 return (
 			 <div>
-				 <PlaylistHeader onSearch={this.handleSearch} />
-				 <Playlist playlist={this.state} />
+				 <PlaylistHeader onPlaylist={this.handlePlaylist} />
+				 <Playlist playlist={this.state.playlist} />
 			 </div>
 		 );
 	 }
