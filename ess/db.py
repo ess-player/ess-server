@@ -163,7 +163,7 @@ class Player(Base):
 				'playername'  : self.playername,
 				'description' : self.description,
 				'current'     : self.current.serialize(expand-1) \
-						if expand else self.current_idx }
+						if expand and self.current else self.current_idx }
 
 
 class PlaylistEntry(Base):
