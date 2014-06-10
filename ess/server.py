@@ -42,13 +42,13 @@ def render():
 @app.route('/search', methods = ['POST'])
 def media_search():
 	'''Full text search for media files.
-	
+
 	This method exposes an easy to use method for searching through the media
 	library. It should be convenient to use for UIs wanting to have a general
 	search interface.
 
 	HTTP return codes:
-	
+
 		====  =====================  ======================
 		Code  Status                 Meaning
 		====  =====================  ======================
@@ -56,7 +56,7 @@ def media_search():
 		400   Bad Request            Review your request
 		500   Internal Server Error  Please report this
 		====  =====================  ======================
-	
+
 	cURL command to search for term “pathetic”::
 
 		curl -f --request POST 'http://localhost:5001/search' \\
@@ -68,20 +68,20 @@ def media_search():
 		  "media": [
 			 {
 				"album": {
-				  "artist": 1, 
-				  "id": 1, 
+				  "artist": 1,
+				  "id": 1,
 				  "name": "Lightning"
-				}, 
+				},
 				"artist": {
-				  "id": 1, 
+				  "id": 1,
 				  "name": "Tamara Laurel"
-				}, 
-				"date": "2014", 
-				"duration": null, 
-				"genre": "(255)", 
-				"path": "/home/lars/music/sorted/Tamara Laurel - Lightning/05 - Tamara Laurel - Pathetic.mp3", 
-				"times_played": null, 
-				"title": "Pathetic", 
+				},
+				"date": "2014",
+				"duration": null,
+				"genre": "(255)",
+				"path": "/home/lars/music/sorted/Tamara Laurel - Lightning/05 - Tamara Laurel - Pathetic.mp3",
+				"times_played": null,
+				"title": "Pathetic",
 				"tracknumber": 5
 			 }
 		  ]
