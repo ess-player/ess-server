@@ -1,13 +1,23 @@
 /** @jsx React.DOM */
 
 var Result = React.createClass({
+	addEntry: function() {
+		var request = JSON.stringify({ media : this.props.id });
+		$.ajax({
+			type: "POST",
+			dataType: 'json',
+			headers: { 'Content-Type' : 'application/json' },
+			url: '/playlist/' + selected_player,
+			data: request
+		});
+	},
 	render: function() {
 		return (
 			<tr>
 				<td>{this.props.artist}</td>
 				<td>{this.props.album}</td>
 				<td>{this.props.title}</td>
-				<td><a href="#" title="Add to playlist">⏩</a></td>
+				<td><a title="Add to playlist" onClick={this.addEntry}>⏩</a></td>
 			</tr>
 			);
 	}
@@ -20,9 +30,22 @@ var SearchResult = React.createClass({
 		}
 		var resultNodes = this.props.media.map(function (media, index) {
 			return <Result key={index} artist={media.artist.name}
-			album={media.album.name} title={media.title} />
+			album={media.album.name} title={media.title} id={media.id} />
 		});
-		return <table className="body">{resultNodes}</table>;
+		return (
+			<table className="body">
+				<thead>
+					<tr>
+						<td>Artist</td>
+						<td>Album</td>
+						<td>Title</td>
+						<td></td>
+					</tr>
+				</thead>
+				<tbody>
+					{resultNodes}
+				</tbody>
+			</table>);
 	}
 });
 

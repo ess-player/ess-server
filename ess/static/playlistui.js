@@ -21,25 +21,46 @@ var Playlist = React.createClass({
 		var resultNodes = this.props.playlist.map(function (entry, index) {
 			return <Entry key={index} entry={entry} />
 		});
-		return <table className="body">{resultNodes}</table>;
+		return (
+			<table className="body">
+				<thead>
+					<tr>
+						<td>#</td>
+						<td>Artist</td>
+						<td>Album</td>
+						<td>Title</td>
+					</tr>
+				</thead>
+				<tbody>
+					{resultNodes}
+				</tbody>
+			</table>
+			);
 	}
 });
 
+
+selected_player = ''
+
 var PlaylistHeader = React.createClass({
 	handlePlaylist: function() {
-		var keyword = this.refs.keyword.getDOMNode().value.trim();
-		this.props.onPlaylist(keyword);
+		selected_player = this.refs.keyword.getDOMNode().value.trim();
+		this.props.onPlaylist(selected_player);
 		return false;
 	},
 	render: function() {
+		var playerOptions = this.props.player.map(function (player, index) {
+			return <option value={player.playername}>{player.playername}</option>
+		});
 		return (
-			<div className="header search">
+			<div className="header player">
 				<form className="playerSelectForm" onSubmit={this.handlePlaylist}>
-					<input type="text" placeholder="Playername…" ref="keyword" />
-					<input type="image" src="/static/icons/iconmonstr-magnifier-icon-48.png" alt="Submit" />
+					<select onChange={this.handlePlaylist} ref="keyword">
+						{playerOptions}
+					</select>
 				</form>
 			</div>
-		);
+			);
 	}
 });
 
@@ -51,26 +72,39 @@ var PlaylistUI = React.createClass({
 			url: '/playlist/' + playername + '?expand=2',
 			success: function( result ) {
 				playlist = result[playername];
-				this.setState({playlist:playlist});
+				this.setState({playlist:playlist, player:this.state.player});
 			}.bind(this)
 		});
-	 },
-	 getInitialState: function() {
-		 this.handlePlaylist('player01');
-		 return {playlist:[]};
-	 },
-	 render: function() {
-		 return (
-			 <div>
-				 <PlaylistHeader onPlaylist={this.handlePlaylist} />
-				 <Playlist playlist={this.state.playlist} />
-			 </div>
-		 );
-	 }
+	},
+	getInitialState: function() {
+		var player = [];
+		$.ajax({
+			type: "GET",
+			dataType: 'json',
+			url: '/player',
+			async: false,
+			success: function( result ) {
+				player = result.player;
+			}.bind(this)
+		});
+		if (player.length) {
+			this.handlePlaylist(player[0].playername);
+			selected_player = player[0].playername;
+		}
+		return {playlist:[],player:player};
+	},
+	render: function() {
+		return (
+				<div>
+					<PlaylistHeader onPlaylist={this.handlePlaylist} player={this.state.player} />
+					<Playlist playlist={this.state.playlist} />
+				</div>
+				);
+	}
 });
 
 
 React.renderComponent(
-	<PlaylistUI url="/playlist/" />,
-	document.getElementById('playlistui')
-);
+		<PlaylistUI url="/playlist/" />,
+		document.getElementById('playlistui')
+		);

@@ -29,6 +29,12 @@ div.header {
 	font-size: larger;
 }
 
+.player select {
+	float: right;
+	min-width: 100px;
+	padding: 10px;
+}
+
 input[type=image] {
 	width: 32px;
 	margin-bottom: -20px;
@@ -48,4 +54,8 @@ tr:hover {
 
 td {
 	padding: 5px;
+}
+
+thead {
+	font-weight: bold;
 }
