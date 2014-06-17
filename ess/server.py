@@ -362,7 +362,6 @@ def playlist_entry_add(name):
 	except:
 		return 'Invalid data', 400
 
-	print data
 	session = get_session()
 	try:
 		(maximum_order,) = session.query(func.max(PlaylistEntry.order))\

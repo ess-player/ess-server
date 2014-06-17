@@ -120,6 +120,7 @@ class Media(Base):
 
 	def serialize(self, expand=0):
 		result = {
+				'id'           : self.id,
 				'title'        : self.title,
 				'date'         : self.date,
 				'tracknumber'  : self.tracknumber,
