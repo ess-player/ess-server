@@ -174,7 +174,7 @@ def player_register():
 		====  =====================  =============================
 		Code  Status                 Meaning
 		====  =====================  =============================
-		201   Created                Player is registered
+		201   Created                Registered Player
 		204   No Content             Player was already registered
 		400   Bad Request            Review your request
 		500   Internal Server Error  Please report this
@@ -239,12 +239,12 @@ def player_list_all():
 
 	HTTP return codes:
 
-		====  =====================  =================================
+		====  =====================  ===================================
 		Code  Status                 Meaning
-		====  =====================  =================================
-		200   OK                     Return list of registered players
+		====  =====================  ===================================
+		200   OK                     Returned list of registered players
 		500   Internal Server Error  Please report this
-		====  =====================  =================================
+		====  =====================  ===================================
 
 	cURL command to list all players::
 
@@ -277,6 +277,16 @@ def player_list_all():
 def player_list(name):
 	'''List player *name*. The Output is JSON encoded.
 
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		200   OK                     Return playered
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
+
 	cURL command to list player01::
 
 		curl -i http://127.0.0.1:5001/player/player01
@@ -294,13 +304,23 @@ def player_list(name):
 
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'Do not exist', 404
+		return '', 404
 	return jsonify(player.serialize(expand))
 
 
 @app.route('/player/<name>', methods = ['DELETE'])
 def player_delete(name):
 	'''Delete player *name*.
+
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		204   No Content             Player deleted
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
 
 	cURL command to delete “player01“::
 
@@ -309,7 +329,7 @@ def player_delete(name):
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'Do not exist', 404
+		return '', 404
 
 	session.query(PlaylistEntry).filter(PlaylistEntry.playername==name).delete()
 	session.delete(player)
@@ -320,6 +340,15 @@ def player_delete(name):
 @app.route('/playlist', methods = ['GET'])
 def playlist_list_all():
 	'''List the playlist of all registered players. The output is JSON encoded.
+
+	HTTP return codes:
+
+		====  =====================  ==================
+		Code  Status                 Meaning
+		====  =====================  ==================
+		200   OK                     Returned playlists
+		500   Internal Server Error  Please report this
+		====  =====================  ==================
 
 	cURL command to list all playlists::
 
@@ -378,6 +407,15 @@ def playlist_list_all():
 def playlist_delete_all():
 	'''Delete all playlists.
 
+	HTTP return codes:
+
+		====  =====================  ==================
+		Code  Status                 Meaning
+		====  =====================  ==================
+		204   No Content             Playlists deleted
+		500   Internal Server Error  Please report this
+		====  =====================  ==================
+
 	cURL command to delete all playlists::
 
 		curl --request DELETE http://127.0.0.1:5001/playlist
@@ -398,6 +436,16 @@ def playlist_delete_all():
 @app.route('/playlist/<name>', methods = ['GET'])
 def playlist_list(name):
 	'''List the playlist of player *name*. The output is JSON encoded.
+
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		200   OK                     Returned playlist
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
 
 	cURL command to list playlist of “player01“::
 
@@ -431,7 +479,7 @@ def playlist_list(name):
 	# Get Player and Current
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'Do not exist', 404
+		return '', 404
 
 	# Get media
 	playlist = session.query(PlaylistEntry)\
@@ -448,6 +496,17 @@ def playlist_list(name):
 def playlist_put(name):
 	'''Put a playlist for the player *name*. The data have to be
 	JSON encoded.
+
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		201   Created                Created playlist
+		400   Bad Request            Review your request
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
 
 	Example data to put a playlist::
 
@@ -473,7 +532,7 @@ def playlist_put(name):
 	# Check if player exists
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'Do not exist', 404
+		return '', 404
 
 	data = request.form.get('data') \
 			if request.content_type in _formdata \
@@ -482,12 +541,12 @@ def playlist_put(name):
 	try:
 		data = json.loads(data)
 	except:
-		return 'Invalid data', 400
+		return '', 400
 
 	# Get list of media_ids.
 	media = data.get('list')
 	if not media:
-		return 'List of media is missing', 400
+		return '', 400
 
 	# Delete old entries
 	playlist = session.query(PlaylistEntry).filter(PlaylistEntry.playername==name).delete()
@@ -504,6 +563,17 @@ def playlist_put(name):
 def playlist_entry_add(name):
 	'''Add an entry to the playlist of the player *name*. The data have to be
 	JSON encoded.
+
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		201   Created                Created playlist
+		400   Bad Request            Review your request
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
 
 	Example data to post an entry::
 
@@ -531,13 +601,17 @@ def playlist_entry_add(name):
 	try:
 		data = json.loads(data)
 	except:
-		return 'Invalid data', 400
+		return '', 400
 
 	session = get_session()
+
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return '', 404
+
 	try:
 		(maximum_order,) = session.query(func.max(PlaylistEntry.order))\
 				.filter(PlaylistEntry.playername==name).first()
-		print maximum_order
 		session.add(PlaylistEntry(order=maximum_order+1, playername=name,
 			media_id=data['media']))
 	except:
@@ -551,6 +625,16 @@ def playlist_entry_add(name):
 def playlist_delete(name):
 	'''Delete playlist of player *name*.
 
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		204   No Content             Playlist deleted
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
+
 	cURL command to delete playlist of “player01“::
 
 		curl --request DELETE http://127.0.0.1:5001/playlist/player01
@@ -559,7 +643,7 @@ def playlist_delete(name):
 	# Unset current
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'player not found', 404
+		return '', 404
 	player.current_idx = None
 	# Delete playlists
 	session.query(PlaylistEntry).filter(PlaylistEntry.playername==name).delete()
@@ -573,6 +657,16 @@ def playlist_delete(name):
 def playlist_entry_move(name,place):
 	'''Move entry on order *place* up or down in the playlist of player *name*
 
+	HTTP return codes:
+
+		====  =====================  ==============================
+		Code  Status                 Meaning
+		====  =====================  ==============================
+		204   No Content             Changed order
+		404   Not Found              Player or entries do not exist
+		500   Internal Server Error  Please report this
+		====  =====================  ==============================
+
 	cURL command to move entry “1“ of the playlist of “player01“ up and down::
 
 		curl http://127.0.0.1:5001/playlist/player01/1/up
@@ -584,7 +678,7 @@ def playlist_entry_move(name,place):
 	# Get player
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'player not found', 404
+		return '', 404
 
 	direction = 1 if request.path.endswith('/down') else -1
 
@@ -593,7 +687,7 @@ def playlist_entry_move(name,place):
 	entry1   = playlist.filter(PlaylistEntry.order==place).first()
 	entry2   = playlist.filter(PlaylistEntry.order==place + direction).first()
 	if not (entry1 and entry2):
-		return 'entry not found', 404
+		return '', 404
 	if player.current_idx == place:
 		player.current_idx = player.current_idx + direction
 	entry1.media_id, entry2.media_id = entry2.media_id, entry1.media_id
@@ -605,6 +699,16 @@ def playlist_entry_move(name,place):
 def playlist_entry_delete(name,place):
 	'''Delete entry on order *place* of player *name*'s playlist.
 
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		204   No Content             Deleted entry
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
+
 	cURL command to delete entry “3“ of “player01“::
 
 		curl --request DELETE http://127.0.0.1:5001/playlist/player01/3
@@ -612,6 +716,8 @@ def playlist_entry_delete(name,place):
 
 	session = get_session()
 	player = session.query(Player).filter_by(playername=name).first()
+	if not player:
+		return '', 404
 	if player.current_idx == place:
 		player.current_idx = None
 	session.query(PlaylistEntry).filter(and_(PlaylistEntry.playername==name,
@@ -631,6 +737,16 @@ def playlist_entry_delete(name,place):
 def current_playing_delete(name):
 	'''Unset current played sing from the player *name*.
 
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		200   OK                     Deleted current
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
+
 	cURL command to unset current of “player01“::
 
 		curl --request DELETE http://127.0.0.1:5001/playlist/player01/current
@@ -638,7 +754,7 @@ def current_playing_delete(name):
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'Do not exist', 404
+		return '', 404
 	player.current_idx = None
 	session.commit()
 
@@ -647,6 +763,16 @@ def current_playing_delete(name):
 def current_playing_get(name):
 	'''Get current played song from the player *name*. The Output is JSON
 	encoded.
+
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		200   OK                     Returned current
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
 
 	cURL command to get current of “player01“::
 
@@ -667,13 +793,24 @@ def current_playing_get(name):
 	# Get player
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'Do not exist', 404
+		return '', 404
 	return jsonify({'current':player.current.serialize(expand) if player.current else None})
 
 
 @app.route('/playlist/<name>/current', methods = ['PUT'])
 def current_playing_set(name):
 	''' Set current played song from the player *name*. The data have to be JSON encoded.
+
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		201   Created                Set current
+		400   Bad Request            Review your request
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
 
 	Example data to set current to the entry “3“::
 
@@ -701,31 +838,42 @@ def current_playing_set(name):
 		data = request.data
 		type = request.content_type
 	if not type in ['application/json']:
-		return 'Invalid data type: %s' % type, 400
+		return '' % type, 400
 	try:
 		data = json.loads(data)
 	except Exception as e:
-		return e.message, 400
+		return '', 400
 
 	current = data.get('current')
 	if current is None:
-		return 'You have to specify a media', 400
+		return '', 400
 
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'Player does not exist', 404
+		return '', 404
 
 	try:
 		player.current_idx = current
 		session.commit()
 	except:
-		return 'Invalid data', 400
+		return '', 400
 	return '', 201
 
 @app.route('/playlist/<name>/current/done', methods = ['GET'])
 def current_done(name):
 	'''Let the server know, that the current song was played successful.
+
+	HTTP return codes:
+
+		====  =====================  ==========================================
+		Code  Status                 Meaning
+		====  =====================  ==========================================
+		204   No Content             Server knows current was played successful
+		400   Bad Request            Review your request
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  ==========================================
 
 	cURL command to inform server about current played song of “player01“::
 
@@ -735,9 +883,9 @@ def current_done(name):
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
-		return 'Do not exist', 404
+		return '', 404
 	if not player.current:
-		return 'Current was not set', 400
+		return '', 400
 	player.current.media.times_played = + 1
 	if session.query(PlaylistEntry).filter(PlaylistEntry.playername==name,
 			PlaylistEntry.order==player.current_idx + 1).first():
@@ -745,5 +893,5 @@ def current_done(name):
 	else:
 		player.current_idx = None
 	session.commit()
-	return '', 200
+	return '', 204
 
