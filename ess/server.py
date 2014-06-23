@@ -166,11 +166,25 @@ def deliver_media(media_id):
 def player_register():
 	'''Register a player. The data have to be JSON encoded.
 
+	This method exposes an easy to use method for register a new player. It
+	should be called when a new player is initialize.
+
+	HTTP return codes:
+
+		====  =====================  =============================
+		Code  Status                 Meaning
+		====  =====================  =============================
+		201   Created                Player is registered
+		204   No Content             Player was already registered
+		400   Bad Request            Review your request
+		500   Internal Server Error  Please report this
+		====  =====================  =============================
+
 	Example data to register a player “player01”::
 
 		{"name":"player01", "description":"The first player"}
 
-	cURL commend to register a player player01::
+	cURL command to register a player player01::
 
 		curl -i --request POST -H 'Content-Type: application/json' \\
 				--data '{"name":"player01"}'  "http://127.0.0.1:5001/player"
@@ -192,12 +206,12 @@ def player_register():
 	try:
 		data = json.loads(data)
 	except Exception as e:
-		return e.message, 400
+		return '', 400
 
 	# Get the name of the player. It may not be empty.
 	playername = data.get('name')
 	if not playername:
-		return 'playername is missing', 400
+		return '', 400
 
 	# Get an optional description
 	description = data.get('description')
@@ -211,14 +225,47 @@ def player_register():
 			playername=playername,
 			description=description)
 	session.add(player)
-	print('>>> Create new player: %s' % playername)
 	session.commit()
 	return '', 201
 
 
 @app.route('/player', methods = ['GET'])
 def player_list_all():
-	'''List all players.
+	'''List all registered players. The output is JSON encoded.
+
+	This method exposes an easy to use method for listing all registered
+	players. It should be convenient to use for UIs wanting to know all
+	registered players.
+
+	HTTP return codes:
+
+		====  =====================  =================================
+		Code  Status                 Meaning
+		====  =====================  =================================
+		200   OK                     Return list of registered players
+		500   Internal Server Error  Please report this
+		====  =====================  =================================
+
+	cURL command to list all players::
+
+		curl -i http://127.0.0.1:5001/player
+
+	Example for a result::
+
+		{
+			"player": [
+				{
+					"current": 3,
+					"description": "The first player",
+					"playername": "player01"
+				},
+				{
+					"current": null,
+					"description": "The second player",
+					"playername": "player02"
+				}
+			]
+		}
 	'''
 	session = get_session()
 	expand  = get_expand()
@@ -228,7 +275,19 @@ def player_list_all():
 
 @app.route('/player/<name>', methods = ['GET'])
 def player_list(name):
-	'''List player *name*.
+	'''List player *name*. The Output is JSON encoded.
+
+	cURL command to list player01::
+
+		curl -i http://127.0.0.1:5001/player/player01
+
+	Example of a result::
+
+		{
+			"current": 3,
+			"description": "The first player",
+			"playername": "player01"
+		}
 	'''
 	session = get_session()
 	expand  = get_expand()
@@ -241,7 +300,11 @@ def player_list(name):
 
 @app.route('/player/<name>', methods = ['DELETE'])
 def player_delete(name):
-	'''Delete player.
+	'''Delete player *name*.
+
+	cURL command to delete “player01“::
+
+		curl --request DELETE http://127.0.0.1:5001/player/player01
 	'''
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
@@ -256,7 +319,45 @@ def player_delete(name):
 
 @app.route('/playlist', methods = ['GET'])
 def playlist_list_all():
-	''' List playlists of all players
+	'''List the playlist of all registered players. The output is JSON encoded.
+
+	cURL command to list all playlists::
+
+		curl -i http://127.0.0.1:5001/playlist
+
+	Example of a result::
+
+		{
+			"player01": [
+				{
+					"media": 2,
+					"order": 0,
+					"player": "player01"
+				},
+				{
+					"media": 4,
+					"order": 1,
+					"player": "player01"
+				},
+				{
+					"media": 6,
+					"order": 2,
+					"player": "player01"
+				}
+			],
+			"player02": [
+				{
+					"media": 3,
+					"order": 0,
+					"player": "player02"
+				},
+				{
+					"media": 4,
+					"order": 1,
+					"player": "player02"
+				}
+			]
+		}
 	'''
 	result = {}
 
@@ -275,7 +376,11 @@ def playlist_list_all():
 
 @app.route('/playlist', methods = ['DELETE'])
 def playlist_delete_all():
-	''' Delete playlists of all players
+	'''Delete all playlists.
+
+	cURL command to delete all playlists::
+
+		curl --request DELETE http://127.0.0.1:5001/playlist
 	'''
 	session = get_session()
 
@@ -292,7 +397,33 @@ def playlist_delete_all():
 
 @app.route('/playlist/<name>', methods = ['GET'])
 def playlist_list(name):
-	'''List playlist from player *name*.
+	'''List the playlist of player *name*. The output is JSON encoded.
+
+	cURL command to list playlist of “player01“::
+
+		curl -i http://127.0.0.1:5001/playlist/player01
+
+	Example of a result::
+
+		{
+			"player01": [
+				{
+					"media": 2,
+					"order": 0,
+					"player": "player01"
+				},
+				{
+					"media": 4,
+					"order": 1,
+					"player": "player01"
+				},
+				{
+					"media": 6,
+					"order": 2,
+					"player": "player01"
+				}
+			]
+		}
 	'''
 	expand  = get_expand()
 	session = get_session()
@@ -315,7 +446,27 @@ def playlist_list(name):
 
 @app.route('/playlist/<name>', methods = ['PUT'])
 def playlist_put(name):
-	'''Post a playlist for the player *name*.
+	'''Put a playlist for the player *name*. The data have to be
+	JSON encoded.
+
+	Example data to put a playlist::
+
+		{"media":[3,5,7,1]}
+
+	cURL command to put a playlist for “player01“::
+
+		curl -i --request PUT -H 'Content-Type: application/json' \\
+				--data '{"media":[3,5,7,1]}' "http://127.0.0.1:5001/playlist/player01"
+
+	Sending the data:
+
+		The data have to be JSON encoded and should fill the whole request body.
+		The content type of the request should be “application/json”. If
+		necessary, the content type can also be “multipart/form-data” or
+		“application/x-www-form-urlencoded” with the JSON data in the field
+		called “data”. However, we very much like to discourage you from using
+		the later method. While it should work in theory we are only using and
+		testing the first method.
 	'''
 	session = get_session()
 
@@ -351,7 +502,27 @@ def playlist_put(name):
 
 @app.route('/playlist/<name>', methods = ['POST'])
 def playlist_entry_add(name):
-	'''Post a playerlist for the player *name*.
+	'''Add an entry to the playlist of the player *name*. The data have to be
+	JSON encoded.
+
+	Example data to post an entry::
+
+		{"media":3}
+
+	cURL command to post an entry to the playlist of “player01“::
+
+		curl -i --request POST -H 'Content-Type: application/json' \\
+				--data '{"media":3}' "http://127.0.0.1:5001/playlist/player01"
+
+	Sending the data:
+
+		The data have to be JSON encoded and should fill the whole request body.
+		The content type of the request should be “application/json”. If
+		necessary, the content type can also be “multipart/form-data” or
+		“application/x-www-form-urlencoded” with the JSON data in the field
+		called “data”. However, we very much like to discourage you from using
+		the later method. While it should work in theory we are only using and
+		testing the first method.
 	'''
 	data = request.form.get('data') \
 			if request.content_type in _formdata \
@@ -378,7 +549,11 @@ def playlist_entry_add(name):
 
 @app.route('/playlist/<name>', methods = ['DELETE'])
 def playlist_delete(name):
-	'''Delete playlist.
+	'''Delete playlist of player *name*.
+
+	cURL command to delete playlist of “player01“::
+
+		curl --request DELETE http://127.0.0.1:5001/playlist/player01
 	'''
 	session = get_session()
 	# Unset current
@@ -395,9 +570,15 @@ def playlist_delete(name):
 
 @app.route('/playlist/<name>/<int:place>/up')
 @app.route('/playlist/<name>/<int:place>/down')
-def playlist_entry_down(name,place):
-	'''Change playlistentry from playlist playlist on place place with
-	playlistentry on place place-1'''
+def playlist_entry_move(name,place):
+	'''Move entry on order *place* up or down in the playlist of player *name*
+
+	cURL command to move entry “1“ of the playlist of “player01“ up and down::
+
+		curl http://127.0.0.1:5001/playlist/player01/1/up
+
+		curl http://127.0.0.1:5001/playlist/player01/1/down
+'''
 
 	session = get_session()
 	# Get player
@@ -422,7 +603,12 @@ def playlist_entry_down(name,place):
 
 @app.route('/playlist/<name>/<int:place>', methods = ['DELETE'])
 def playlist_entry_delete(name,place):
-	'''Delete playlistentry from playlist on place place'''
+	'''Delete entry on order *place* of player *name*'s playlist.
+
+	cURL command to delete entry “3“ of “player01“::
+
+		curl --request DELETE http://127.0.0.1:5001/playlist/player01/3
+	'''
 
 	session = get_session()
 	player = session.query(Player).filter_by(playername=name).first()
@@ -443,7 +629,12 @@ def playlist_entry_delete(name,place):
 
 @app.route('/playlist/<name>/current', methods = ['DELETE'])
 def current_playing_delete(name):
-	'''Handle current from a player's playlist'''
+	'''Unset current played sing from the player *name*.
+
+	cURL command to unset current of “player01“::
+
+		curl --request DELETE http://127.0.0.1:5001/playlist/player01/current
+	'''
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
@@ -454,7 +645,23 @@ def current_playing_delete(name):
 
 @app.route('/playlist/<name>/current', methods = ['GET'])
 def current_playing_get(name):
-	'''Handle current from a player's playlist'''
+	'''Get current played song from the player *name*. The Output is JSON
+	encoded.
+
+	cURL command to get current of “player01“::
+
+		curl -i http://127.0.0.1:5001/playlist/player01/current
+
+	Example of a result::
+
+		{
+			"current": {
+				"media": 7,
+				"order": 3,
+				"player": "player01"
+			}
+		}
+'''
 	expand  = get_expand()
 	session = get_session()
 	# Get player
@@ -466,6 +673,27 @@ def current_playing_get(name):
 
 @app.route('/playlist/<name>/current', methods = ['PUT'])
 def current_playing_set(name):
+	''' Set current played song from the player *name*. The data have to be JSON encoded.
+
+	Example data to set current to the entry “3“::
+
+		{"current":3}
+
+	cURL command to set current to the entry “3“ from “player01”'s playlist::
+
+		curl -i --request PUT -H 'Content-Type: application/json' \\
+				--data '{"current":3}' "http://127.0.0.1:5001/playlist/player01/current"
+
+	Sending the data:
+
+		The data have to be JSON encoded and should fill the whole request body.
+		The content type of the request should be “application/json”. If
+		necessary, the content type can also be “multipart/form-data” or
+		“application/x-www-form-urlencoded” with the JSON data in the field
+		called “data”. However, we very much like to discourage you from using
+		the later method. While it should work in theory we are only using and
+		testing the first method.
+	'''
 	if request.content_type in _formdata:
 		data = request.form['data']
 		type = request.form['type']
@@ -497,6 +725,12 @@ def current_playing_set(name):
 
 @app.route('/playlist/<name>/current/done', methods = ['GET'])
 def current_done(name):
+	'''Let the server know, that the current song was played successful.
+
+	cURL command to inform server about current played song of “player01“::
+
+		curl http://127.0.0.1:5001/playlist/player01/current/done
+	'''
 	expand  = get_expand()
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
