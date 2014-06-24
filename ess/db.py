@@ -43,16 +43,15 @@ def get_session():
 
 # Database Schema Definition
 class Artist(Base):
-	'''Database definition of an artist.
-	'''
+	'''Database definition of an artist.'''
 
 	__tablename__ = 'artist'
 
-	'''Unique identifier of an artist'''
 	id   = Column('id', Integer(unsigned=True), autoincrement='ignore_fk',
 			primary_key=True)
-	'''Name of an artist'''
+	'''Unique identifier of an artist'''
 	name = Column('name', String(255), nullable=False)
+	'''Name of an artist'''
 
 
 	def __repr__(self):
@@ -72,23 +71,36 @@ class Artist(Base):
 
 
 class Album(Base):
-	'''Album bla...
-	'''
+	'''Database definition of an album.'''
+
 	__tablename__ = 'album'
 
 	id        = Column('id', Integer, autoincrement='ignore_fk',
 			primary_key=True)
+	'''Unique identifier of an album'''
 	name      = Column('name', String(255), nullable=False)
+	'''Name of an album'''
 	artist_id = Column('artist_id', ForeignKey('artist.id'))
+	'''Id of the Artist of an Album'''
 
 	artist    = relationship("Artist", backref=backref('album'))
+	'''Artist of an Album'''
 
 	def __repr__(self):
+		'''Return a string representation of an album object.
+
+		:return: String representation of object.
+		'''
 		return '<Album(id=%i, name="%s", artist_id=%i)>' % \
 				(self.id, self.name, self.artist_id)
 
 
 	def serialize(self, expand=0):
+		'''Serialize this object as dictionary usable for conversion to JSON.
+
+		:param expand: Defines if sub objects shall be serialized as well.
+		:return: Dictionary representing this object.
+		'''
 		if expand:
 			return {'id':self.id, 'name':self.name,
 					'artist':self.artist.serialize(expand-1)}
@@ -96,29 +108,49 @@ class Album(Base):
 
 
 class Media(Base):
+	'''Database definition of a mediafile.'''
 	__tablename__ = 'media'
 
 	id           = Column('id', Integer(unsigned=True), primary_key=True,
 			autoincrement=True)
+	'''Unique identifier of a mediafile'''
 	title        = Column('title', String(255), nullable=False)
+	'''Title of a mediafile'''
 	date         = Column('date', String(255))
+	'''Date of a mediafile'''
 	tracknumber  = Column('tracknumber', Integer(unsigned=True))
+	'''Tracknumber of a mediafile in an album'''
 	times_played = Column('times_played', Integer(unsigned=True), default=0)
+	'''Times the mediafile was played'''
 	path         = Column('path', String(2**16), nullable=False)
+	'''Path of a mediafile'''
 	genre        = Column('genre', String(255))
+	'''Genre of a mediafile'''
 	duration     = Column('duration', Integer(unsigned=True), nullable=True)
+	'''Duration of a mediafile'''
 	artist_id    = Column('artist_id', ForeignKey('artist.id'))
+	'''Id of the Artist of a mediafile'''
 	album_id     = Column('album_id', ForeignKey('album.id'))
-
+	'''Id of the Album of a mediafile'''
 	artist       = relationship("Artist", backref=backref('media'))
+	'''Artist of a mediafile'''
 	album        = relationship("Album",  backref=backref('media'))
-
+	'''Album of a mediafile'''
 	def __repr__(self):
+		'''Return a string representation of a media object.
+
+		:return: String representation of object.
+		'''
 		return '<Media(id=%i, title="%s", artist_id=%i)>' % \
 			(self.id, self.title, self.artist_id)
 
 
 	def serialize(self, expand=0):
+		'''Serialize this object as dictionary usable for conversion to JSON.
+
+		:param expand: Defines if sub objects shall be serialized as well.
+		:return: Dictionary representing this object.
+		'''
 		result = {
 				'id'           : self.id,
 				'title'        : self.title,
@@ -137,14 +169,18 @@ class Media(Base):
 
 
 class Player(Base):
+	'''Database definition of a player.'''
 	__tablename__ = 'player'
 
 	playername  = Column('playername', String(255), primary_key=True)
+	'''Name of a player (This is unique)'''
 	description = Column('description', String(255))
+	'''Optional description of a player'''
 	current_idx = Column('current', Integer(unsigned=True), default=None)
-
+	'''Id of the mediafile that is currently played'''
 	current     = relationship("PlaylistEntry",
 			foreign_keys=[playername, current_idx])
+	'''Mediafile that is currenty played'''
 
 	__table_args__ = (
 			ForeignKeyConstraint(
@@ -155,11 +191,20 @@ class Player(Base):
 			{})
 
 	def __repr__(self):
+		'''Return a string representation of a player object.
+
+		:return: String representation of object.
+		'''
 		return '<Player(playername=%s, description=%s, current_idx=%i)>' % \
 			(self.playername, self.description, self.current_idx)
 
 
 	def serialize(self, expand=0):
+		'''Serialize this object as dictionary usable for conversion to JSON.
+
+		:param expand: Defines if sub objects shall be serialized as well.
+		:return: Dictionary representing this object.
+		'''
 		return {
 				'playername'  : self.playername,
 				'description' : self.description,
@@ -169,20 +214,34 @@ class Player(Base):
 
 class PlaylistEntry(Base):
 	__tablename__ = 'playlist_entry'
+	'''Database definition of a playlistentry'''
 
 	playername  = Column('playername', ForeignKey('player.playername'), primary_key=True)
+	'''Name of the player to which the playlist belongs'''
 	order       = Column('order', Integer(unsigned=True), primary_key=True, autoincrement=False)
+	'''The position of a playlistentry in the playlist'''
 	media_id    = Column('media_id', ForeignKey('media.id'), nullable=False)
-
+	'''Id of the mediafile corresponding to the playlistentry'''
 	media       = relationship("Media",  backref=backref('playlist_entry'))
+	'''Mediafile corresponding to the playlistentry'''
 	player      = relationship("Player", foreign_keys=[playername])
+	'''Player to which the playlist belongs'''
 
 	def __repr__(self):
+		'''Return a string representation of a playlistentry object.
+
+		:return: String representation of object.
+		'''
 		return '<(playername=%s, order=%i, media_id=%i)>' % \
 			(self.playername, self.order, self.media_id)
 
 
 	def serialize(self, expand=0):
+		'''Serialize this object as dictionary usable for conversion to JSON.
+
+		:param expand: Defines if sub objects shall be serialized as well.
+		:return: Dictionary representing this object.
+		'''
 		return {
 				'player' : self.player.serialize(expand-1) if expand else self.playername,
 				'order'  : self.order,
