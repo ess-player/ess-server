@@ -37,11 +37,12 @@ def insert_media(path):
 				print 'Could not import %s' % path
 				return
 
-	tags = data['format'].get('tags') or {}
-
 	if	data['format']['format_name'] not in config.FORMATS:
 		print ('>>> Warning: Format not supported from %s' % path)
 		return 1
+
+	tags = data['format'].get('tags') or {}
+	tags = {k.lower():v for k,v in tags.items()}
 
 	# Try to get the artist from db
 	artist = None
