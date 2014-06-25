@@ -176,6 +176,8 @@ class Player(Base):
 	'''Name of a player (This is unique)'''
 	description = Column('description', String(255))
 	'''Optional description of a player'''
+	command = Column('command', String(255), default=None)
+	'''Command for the player. The most time None'''
 	current_idx = Column('current', Integer(unsigned=True), default=None)
 	'''Id of the mediafile that is currently played'''
 	current     = relationship("PlaylistEntry",

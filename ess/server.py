@@ -8,17 +8,20 @@
 	:license: FreeBSD, see license file for more details.
 '''
 
+
+# Imports
 # Set default encoding to UTF-8
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
-
-# Imports
 from flask import Flask, request, redirect, url_for, render_template, jsonify, stream_with_context, Response
 from sqlalchemy import or_, and_, desc, func
 import json
 from ess.db import get_session, Media, Artist, Album, Player, PlaylistEntry
 import os.path
+from time import sleep
+
+
 # Create aplication
 app = Flask(__name__)
 app.config.from_object(__name__)
@@ -860,6 +863,7 @@ def current_playing_set(name):
 		return '', 400
 	return '', 201
 
+
 @app.route('/playlist/<name>/current/done', methods = ['GET'])
 def current_done(name):
 	'''Let the server know, that the current song was played successful.
@@ -895,3 +899,103 @@ def current_done(name):
 	session.commit()
 	return '', 204
 
+
+
+@app.route('/command/<name>', methods = ['GET'])
+def command_get(name):
+	'''Get command for the player *name*. The Output is JSON
+	encoded.
+
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		200   OK                     Returned command
+		200   No Content             No Command set
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
+
+	cURL command to get current of “player01“::
+
+		curl -i http://127.0.0.1:5001/command/player01
+
+	Example of a result::
+
+		{"command": "next"}
+	'''
+	for i in range(300):
+		session = get_session()
+		player = session.query(Player).filter(Player.playername==name).first()
+		if not player:
+			return '', 404
+		if	player.command:
+			command = player.command
+			player.command = None
+			session.commit()
+			return jsonify({'command':command}), 200
+		session.close()
+		sleep(0.1)
+	return '', 204
+
+
+@app.route('/command/<name>', methods = ['PUT'])
+def command_set(name):
+	'''Set command for the player *name*. The data have to be JSON encoded.
+
+	HTTP return codes:
+
+		====  =====================  =====================
+		Code  Status                 Meaning
+		====  =====================  =====================
+		201   Created                Set command
+		400   Bad Request            Review your request
+		404   Not Found              Player does not exist
+		500   Internal Server Error  Please report this
+		====  =====================  =====================
+
+	Example data to set command “pause“::
+
+		{"command":"pause"}
+
+	cURL command to set command “pause“ for “player01”::
+
+		curl -i --request PUT -H 'Content-Type: application/json' \\
+				--data '{"command":"pause"}' "http://127.0.0.1:5001/command/player01"
+
+	Sending the data:
+
+		The data have to be JSON encoded and should fill the whole request body.
+		The content type of the request should be “application/json”. If
+		necessary, the content type can also be “multipart/form-data” or
+		“application/x-www-form-urlencoded” with the JSON data in the field
+		called “data”. However, we very much like to discourage you from using
+		the later method. While it should work in theory we are only using and
+		testing the first method.
+	'''
+	if request.content_type in _formdata:
+		data = request.form['data']
+		type = request.form['type']
+	else:
+		data = request.data
+		type = request.content_type
+	if not type in ['application/json']:
+		return '' % type, 400
+	try:
+		data = json.loads(data)
+	except Exception as e:
+		return '', 400
+
+	command = data.get('command')
+	if command is None:
+		return '', 400
+
+	session = get_session()
+	player = session.query(Player).filter(Player.playername==name).first()
+	if not player:
+		return '', 404
+
+	player.command = command
+	session.commit()
+	return '', 204
