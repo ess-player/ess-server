@@ -8,7 +8,10 @@ var Result = React.createClass({
 			dataType: 'json',
 			headers: { 'Content-Type' : 'application/json' },
 			url: '/playlist/' + selected_player,
-			data: request
+			data: request,
+			statusCode: {
+				201: update_playlist
+			}
 		});
 	},
 	render: function() {

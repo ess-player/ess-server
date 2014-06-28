@@ -59,3 +59,20 @@ td {
 thead {
 	font-weight: bold;
 }
+
+.playlistentry:hover td.playlistid {
+	display: none;
+}
+
+.playlistentry td.playbtn {
+	display: none;
+}
+
+.playlistentry:hover td.playbtn {
+	display: table-cell;
+	text-align: center;
+}
+
+a, .ln {
+	cursor: pointer;
+}
