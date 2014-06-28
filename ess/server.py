@@ -144,7 +144,8 @@ def media_search():
 
 	search = data.get('search')
 	searchlist = (search or '').split()
-	entries = get_session().query(Media)\
+	session = get_session()
+	entries = session.query(Media)\
 			.outerjoin(Album)\
 			.outerjoin(Artist)
 	for s in searchlist:
@@ -177,6 +178,8 @@ def media_search():
 	if limit:
 		entries = entries.limit(limit)
 
+	session.close()
+
 	return jsonify({'media'     : [e.serialize(1) for e in entries],
 						 'offset'    : offset,
 						 'count'     : count,
@@ -188,21 +191,25 @@ def media_search():
 @app.route('/media/<int:media_id>')
 def deliver_media(media_id):
 	''' Deliver media to player '''
-
-	media = get_session().query(Media).filter(Media.id ==
+	session = get_session()
+	media = session.query(Media).filter(Media.id ==
 			media_id).first()
 
 	if not media:
+		session.close()
 		return '', 404
 
+	path = media.path
+	session.close()
+
 	def generate():
-		with open(media.path,'rb') as f:
+		with open(path,'rb') as f:
 			part = f.read(1024)
 			while part:
 				yield part
 				part = f.read(128*1024)
  	response = Response(stream_with_context(generate()), mimetype='application/octet-stream')
-	response.headers['content-length'] = os.path.getsize(media.path)
+	response.headers['content-length'] = os.path.getsize(path)
 	return response
 
 
@@ -264,12 +271,14 @@ def player_register():
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==playername).first()
 	if player:
+		session.close()
 		return '', 204
 	player = Player(
 			playername=playername,
 			description=description)
 	session.add(player)
 	session.commit()
+	session.close()
 	return '', 201
 
 
@@ -314,6 +323,7 @@ def player_list_all():
 	session = get_session()
 	expand  = get_expand()
 	playerlist = [p.serialize(expand) for p in session.query(Player)]
+	session.close()
 	return  jsonify(player=playerlist)
 
 
@@ -348,9 +358,11 @@ def player_list(name):
 
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
-	return jsonify(player.serialize(expand))
-
+	result = jsonify(player.serialize(expand))
+	session.close()
+	return result
 
 @app.route('/player/<name>', methods = ['DELETE'])
 def player_delete(name):
@@ -373,11 +385,13 @@ def player_delete(name):
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
 
 	session.query(PlaylistEntry).filter(PlaylistEntry.playername==name).delete()
 	session.delete(player)
 	session.commit()
+	session.close()
 	return '', 204
 
 
@@ -443,7 +457,7 @@ def playlist_list_all():
 		if not result.get(entry.playername):
 			result[entry.playername] = []
 		result[entry.playername].append(entry.serialize(expand))
-
+	session.close()
 	return jsonify(result)
 
 
@@ -474,6 +488,7 @@ def playlist_delete_all():
 	session.query(PlaylistEntry).delete()
 
 	session.commit()
+	session.close()
 	return '', 204
 
 
@@ -523,6 +538,7 @@ def playlist_list(name):
 	# Get Player and Current
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
 
 	# Get media
@@ -532,7 +548,7 @@ def playlist_list(name):
 
 	# Collect media of playlist
 	items = [e.serialize(expand) for e in playlist]
-
+	session.close()
 	return jsonify({name:items})
 
 
@@ -576,6 +592,7 @@ def playlist_put(name):
 	# Check if player exists
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
 
 	data = request.form.get('data') \
@@ -585,11 +602,13 @@ def playlist_put(name):
 	try:
 		data = json.loads(data)
 	except:
+		session.close()
 		return '', 400
 
 	# Get list of media_ids.
 	media = data.get('list')
 	if not media:
+		session.close()
 		return '', 400
 
 	# Delete old entries
@@ -600,6 +619,7 @@ def playlist_put(name):
 		session.add(PlaylistEntry(order=i, playername=name, media_id=media[i]))
 
 	session.commit()
+	session.close()
 	return '', 201
 
 
@@ -651,6 +671,7 @@ def playlist_entry_add(name):
 
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
 
 	try:
@@ -659,9 +680,11 @@ def playlist_entry_add(name):
 		session.add(PlaylistEntry(order=maximum_order+1, playername=name,
 			media_id=data['media']))
 	except:
+		session.close()
 		return '', 400
 
 	session.commit()
+	session.close()
 	return '', 201
 
 
@@ -692,7 +715,7 @@ def playlist_delete(name):
 	# Delete playlists
 	session.query(PlaylistEntry).filter(PlaylistEntry.playername==name).delete()
 	session.commit()
-
+	session.close()
 	return '', 204
 
 
@@ -722,6 +745,7 @@ def playlist_entry_move(name,place):
 	# Get player
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
 
 	direction = 1 if request.path.endswith('/down') else -1
@@ -731,11 +755,13 @@ def playlist_entry_move(name,place):
 	entry1   = playlist.filter(PlaylistEntry.order==place).first()
 	entry2   = playlist.filter(PlaylistEntry.order==place + direction).first()
 	if not (entry1 and entry2):
+		session.close()
 		return '', 404
 	if player.current_idx == place:
 		player.current_idx = player.current_idx + direction
 	entry1.media_id, entry2.media_id = entry2.media_id, entry1.media_id
 	session.commit()
+	session.close()
 	return '', 204
 
 
@@ -761,6 +787,7 @@ def playlist_entry_delete(name,place):
 	session = get_session()
 	player = session.query(Player).filter_by(playername=name).first()
 	if not player:
+		session.close()
 		return '', 404
 	if player.current_idx == place:
 		player.current_idx = None
@@ -774,6 +801,7 @@ def playlist_entry_delete(name,place):
 		PlaylistEntry.order>place)).order_by(PlaylistEntry.order):
 		e.order = e.order-1
 	session.commit()
+	session.close()
 	return '', 204
 
 
@@ -798,9 +826,12 @@ def current_playing_delete(name):
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
 	player.current_idx = None
 	session.commit()
+	session.close()
+	return '', 204
 
 
 @app.route('/playlist/<name>/current', methods = ['GET'])
@@ -837,9 +868,11 @@ def current_playing_get(name):
 	# Get player
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
-	return jsonify({'current':player.current.serialize(expand) if player.current else None})
-
+	result = jsonify({'current':player.current.serialize(expand) if player.current else None})
+	session.close()
+	return result
 
 @app.route('/playlist/<name>/current', methods = ['PUT'])
 def current_playing_set(name):
@@ -895,6 +928,7 @@ def current_playing_set(name):
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
 
 	try:
@@ -902,6 +936,7 @@ def current_playing_set(name):
 		session.commit()
 	except:
 		return '', 400
+	session.close()
 	return '', 201
 
 
@@ -928,8 +963,10 @@ def current_done(name):
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
 	if not player.current:
+		session.close()
 		return '', 400
 	player.current.media.times_played = + 1
 	if session.query(PlaylistEntry).filter(PlaylistEntry.playername==name,
@@ -938,6 +975,7 @@ def current_done(name):
 	else:
 		player.current_idx = None
 	session.commit()
+	session.close()
 	return '', 204
 
 
@@ -970,11 +1008,13 @@ def command_get(name):
 		session = get_session()
 		player = session.query(Player).filter(Player.playername==name).first()
 		if not player:
+			session.close()
 			return '', 404
 		if	player.command:
 			command = player.command
 			player.command = None
 			session.commit()
+			session.close()
 			return jsonify({'command':command}), 200
 		session.close()
 		sleep(0.1)
@@ -1035,8 +1075,10 @@ def command_set(name):
 	session = get_session()
 	player = session.query(Player).filter(Player.playername==name).first()
 	if not player:
+		session.close()
 		return '', 404
 
 	player.command = command
 	session.commit()
+	session.close()
 	return '', 204
