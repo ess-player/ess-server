@@ -50,6 +50,17 @@ def media_search():
 	library. It should be convenient to use for UIs wanting to have a general
 	search interface.
 
+	URL parameters:
+
+		=========  =======  ====================  ================================
+		Parameter  Default  Possible values       Meaning
+		=========  =======  ====================  ================================
+		limit      20       Positive Integer      Number of returned media entries
+		offset     0        Positive Integer      Offset of Result
+		order      artist   artist, album, title  Order of Result
+		order_dir  asc      asc, desc             Ascending or descending order
+		=========  =======  ====================  ================================
+
 	HTTP return codes:
 
 		====  =====================  ======================
@@ -60,14 +71,17 @@ def media_search():
 		500   Internal Server Error  Please report this
 		====  =====================  ======================
 
-	cURL command to search for term “pathetic”::
+	cURL command to search for term “pathetic” with limit=1, offset=0,
+	order=title and order_dir=asc::
 
-		curl -f --request POST 'http://localhost:5001/search' \\
+		curl -f --request POST 'http://localhost:5001/search?limit=1&order=title' \\
 				-H 'Content-Type: application/json' --data '{"search":"pathetic"}'
 
 	Search result::
 
 		{
+		  "count": 12,
+		  "limit": 1,
 		  "media": [
 			 {
 				"album": {
@@ -87,7 +101,10 @@ def media_search():
 				"title": "Pathetic",
 				"tracknumber": 5
 			 }
-		  ]
+		  ],
+		  "offset":0,
+		  "order":"title",
+		  "order_dir":"asc"
 		}
 
 	Sending the data:
@@ -101,47 +118,71 @@ def media_search():
 		testing the first method.
 
 	'''
+
+	try:
+		limit = int(request.args.get('limit', 20))
+	except:
+		limit = 20
+	try:
+		offset = int(request.args.get('offset', 0))
+	except:
+		offset = 0
+	order = request.args.get('order', 'artist')
+	if not order in ['artist', 'album', 'title']:
+		order = 'artist'
+	order_dir = request.args.get('order_dir', 'asc')
+	if not order_dir in ['asc', 'desc']:
+		order_dir = 'asc'
+
 	data = request.form.get('data') \
 			if request.content_type in _formdata \
 			else request.data
 	try:
 		data = json.loads(data)
 	except Exception as e:
-		return e.message, 400
+		return '', 400
 
 	search = data.get('search')
-	if not search:
-		entries = get_session().query(Media)\
-					.outerjoin(Album)\
-					.outerjoin(Artist)
-	else:
-		searchlist = search.split()
-		if not searchlist:
-			entries = get_session().query(Media)\
-					.outerjoin(Album)\
-					.outerjoin(Artist)
+	searchlist = (search or '').split()
+	entries = get_session().query(Media)\
+			.outerjoin(Album)\
+			.outerjoin(Artist)
+	for s in searchlist:
+		hs = '%' + s + '%'
+		entries  = entries\
+				.filter(or_(Media.title.like(hs),
+							Media.genre.like(hs),
+							Media.date.like(hs),
+							Album.name.like(hs),
+							Artist.name.like(hs)))
+
+	count = entries.count()
+
+	if order_dir == 'desc':
+		if order == 'album':
+			entries = entries.order_by(Album.name.desc())
+		elif order == 'title':
+			entries = entries.order_by(Media.title.desc())
 		else:
-			hs = '%' + searchlist[0]  + '%'
-			entries = get_session().query(Media)\
-						.outerjoin(Album)\
-						.outerjoin(Artist)\
-						.filter(or_(Media.title.like(hs),
-									Media.genre.like(hs),
-									Media.date.like(hs),
-									Album.name.like(hs),
-									Artist.name.like(hs)))
+			entries = entries.order_by(Artist.name.desc())
+	else:
+		if order == 'album':
+			entries = entries.order_by(Album.name)
+		elif order == 'title':
+			entries = entries.order_by(Media.title)
+		else:
+			entries = entries.order_by(Artist.name)
 
-			for s in searchlist[1:]:
-				hs = '%' + s + '%'
-				entries  = entries\
-						.filter(or_(Media.title.like(hs),
-									Media.genre.like(hs),
-									Media.date.like(hs),
-									Album.name.like(hs),
-									Artist.name.like(hs)))
+	entries = entries.offset(offset)
+	if limit:
+		entries = entries.limit(limit)
 
-	entries = entries.order_by(Artist.name)
-	return jsonify({'media': [e.serialize(1) for e in entries]})
+	return jsonify({'media'     : [e.serialize(1) for e in entries],
+						 'offset'    : offset,
+						 'count'     : count,
+						 'limit'     : limit,
+						 'order'     : order,
+						 'order_dir' : order_dir})
 
 
 @app.route('/media/<int:media_id>')
