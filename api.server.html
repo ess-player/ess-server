@@ -8,7 +8,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>ess.server &mdash; ess-player 0.s20140625 documentation</title>
+    <title>ess.server &mdash; ess-player 0.s20140628 documentation</title>
     
     <link rel="stylesheet" href="_static/lernfunk.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -17,7 +17,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.s20140625',
+        VERSION:     '0.s20140628',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -27,14 +27,14 @@
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
     <script type="text/javascript" src="_static/theme_extras.js"></script>
-    <link rel="top" title="ess-player 0.s20140625 documentation" href="index.html" />
+    <link rel="top" title="ess-player 0.s20140628 documentation" href="index.html" />
     <link rel="up" title="API Documentation" href="api.html" />
     <link rel="next" title="REST Documentation" href="rest.html" />
     <link rel="prev" title="ess.db" href="api.db.html" /> 
   </head>
   <body>
       <div class="header"><img class="rightlogo" src="_static/logo.png" alt="Logo"/><h1 class="heading"><a href="index.html">
-          <span>ess-player 0.s20140625 documentation</span></a></h1>
+          <span>ess-player 0.s20140628 documentation</span></a></h1>
         <h2 class="heading"><span>ess.server</span></h2>
       </div>
       <div class="topnav">
@@ -369,6 +369,46 @@ testing the first method.</div></blockquote>
 <p>This method exposes an easy to use method for searching through the media
 library. It should be convenient to use for UIs wanting to have a general
 search interface.</p>
+<p>URL parameters:</p>
+<blockquote>
+<div><table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="10%" />
+<col width="29%" />
+<col width="47%" />
+</colgroup>
+<thead valign="bottom">
+<tr class="row-odd"><th class="head">Parameter</th>
+<th class="head">Default</th>
+<th class="head">Possible values</th>
+<th class="head">Meaning</th>
+</tr>
+</thead>
+<tbody valign="top">
+<tr class="row-even"><td>limit</td>
+<td>20</td>
+<td>Positive Integer</td>
+<td>Number of returned media entries</td>
+</tr>
+<tr class="row-odd"><td>offset</td>
+<td>0</td>
+<td>Positive Integer</td>
+<td>Offset of Result</td>
+</tr>
+<tr class="row-even"><td>order</td>
+<td>artist</td>
+<td>artist, album, title</td>
+<td>Order of Result</td>
+</tr>
+<tr class="row-odd"><td>order_dir</td>
+<td>asc</td>
+<td>asc, desc</td>
+<td>Ascending or descending order</td>
+</tr>
+</tbody>
+</table>
+</div></blockquote>
 <p>HTTP return codes:</p>
 <blockquote>
 <div><table border="1" class="docutils">
@@ -399,12 +439,15 @@ search interface.</p>
 </tbody>
 </table>
 </div></blockquote>
-<p>cURL command to search for term “pathetic”:</p>
-<div class="highlight-python"><pre>curl -f --request POST 'http://localhost:5001/search' \
+<p>cURL command to search for term “pathetic” with limit=1, offset=0,
+order=title and order_dir=asc:</p>
+<div class="highlight-python"><pre>curl -f --request POST 'http://localhost:5001/search?limit=1&amp;order=title' \
         -H 'Content-Type: application/json' --data '{"search":"pathetic"}'</pre>
 </div>
 <p>Search result:</p>
 <div class="highlight-python"><div class="highlight"><pre><span class="p">{</span>
+  <span class="s">&quot;count&quot;</span><span class="p">:</span> <span class="mi">12</span><span class="p">,</span>
+  <span class="s">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
   <span class="s">&quot;media&quot;</span><span class="p">:</span> <span class="p">[</span>
      <span class="p">{</span>
         <span class="s">&quot;album&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -424,7 +467,10 @@ search interface.</p>
         <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;Pathetic&quot;</span><span class="p">,</span>
         <span class="s">&quot;tracknumber&quot;</span><span class="p">:</span> <span class="mi">5</span>
      <span class="p">}</span>
-  <span class="p">]</span>
+  <span class="p">],</span>
+  <span class="s">&quot;offset&quot;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+  <span class="s">&quot;order&quot;</span><span class="p">:</span><span class="s">&quot;title&quot;</span><span class="p">,</span>
+  <span class="s">&quot;order_dir&quot;</span><span class="p">:</span><span class="s">&quot;asc&quot;</span>
 <span class="p">}</span>
 </pre></div>
 </div>
